@@ -1,0 +1,19 @@
+{
+  "name": "Sand",
+  "short_name": "Sand",
+  "description": "A tray of real-feeling sand on your screen. Touch it, tilt it, shake it.",
+  "id": "./",
+  "start_url": "./",
+  "scope": "./",
+  "display": "fullscreen",
+  "display_override": ["fullscreen", "standalone"],
+  "orientation": "natural",
+  "background_color": "#000000",
+  "theme_color": "#000000",
+  "categories": ["entertainment", "lifestyle"],
+  "icons": [
+    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}

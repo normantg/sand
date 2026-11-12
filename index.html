@@ -2,83 +2,138 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover, interactive-widget=overlays-content">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Sand">
+<meta name="application-name" content="Sand">
+<meta name="format-detection" content="telephone=no">
+<meta name="color-scheme" content="dark">
 <meta name="theme-color" content="#000000">
 <meta name="description" content="A tray of real-feeling sand on your screen. Touch it, tilt it, shake it.">
 <title>Sand</title>
 <link rel="manifest" href="manifest.webmanifest">
-<link rel="apple-touch-icon" href="icon-180.png">
-<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+<link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@700&display=swap" rel="stylesheet">
 <style>
-  html, body { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; background: #000; }
-  body { position: fixed; inset: 0; touch-action: none; overscroll-behavior: none;
+  :root { --ink: #f3eee6; --glass: rgba(18, 16, 14, 0.62); --line: rgba(255, 255, 255, 0.11);
+          --sat: env(safe-area-inset-top, 0px); --sar: env(safe-area-inset-right, 0px); --sab: env(safe-area-inset-bottom, 0px); --sal: env(safe-area-inset-left, 0px); }
+  html { height: 100%; background: #000; overflow: hidden; overscroll-behavior: none; -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
+  body { margin: 0; position: fixed; inset: 0; overflow: hidden; background: #000; touch-action: none; overscroll-behavior: none;
          -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; -webkit-tap-highlight-color: transparent;
-         font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; color: #f2ede4; }
-  #stage { position: fixed; inset: 0; overflow: hidden; }
-  #c { position: absolute; display: block; transform-origin: 50% 50%; touch-action: none; }
-  .glass { background: rgba(22, 20, 18, 0.55); -webkit-backdrop-filter: blur(18px) saturate(1.3); backdrop-filter: blur(18px) saturate(1.3);
-           border: 1px solid rgba(255, 255, 255, 0.10); }
-  #menuBtn { position: fixed; z-index: 5; top: calc(env(safe-area-inset-top, 0px) + 12px); right: calc(env(safe-area-inset-right, 0px) + 12px);
-             width: 40px; height: 40px; border-radius: 20px; display: grid; place-items: center; cursor: pointer; opacity: 0.55;
-             transition: opacity .3s; padding: 0; }
-  #menuBtn:active { opacity: 1; }
-  #menuBtn svg { width: 20px; height: 20px; }
-  #panel { position: fixed; z-index: 6; left: 50%; bottom: calc(env(safe-area-inset-bottom, 0px) + 14px); width: min(92vw, 420px);
-           transform: translate(-50%, 130%); transition: transform .38s cubic-bezier(.2, .9, .25, 1); border-radius: 22px; padding: 16px 16px 14px; box-sizing: border-box; }
-  #panel.open { transform: translate(-50%, 0); }
-  #panel h3 { margin: 2px 2px 10px; font-size: 12px; letter-spacing: .12em; text-transform: uppercase; font-weight: 600; opacity: .6; }
-  #sands { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; margin-bottom: 14px; }
-  .sand { background: none; border: 0; color: inherit; display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 4px 0; cursor: pointer; font: inherit; }
-  .sand i { width: 44px; height: 44px; border-radius: 50%; box-shadow: inset 0 -3px 6px rgba(0, 0, 0, .35), 0 2px 6px rgba(0, 0, 0, .4); outline: 2px solid transparent; outline-offset: 3px; transition: outline-color .2s; }
-  .sand.on i { outline-color: rgba(255, 255, 255, .85); }
-  .sand span { font-size: 10.5px; opacity: .8; text-align: center; line-height: 1.15; }
-  .row { display: flex; gap: 8px; margin-bottom: 10px; }
-  .row button { flex: 1; height: 42px; border-radius: 12px; border: 1px solid rgba(255, 255, 255, .12); background: rgba(255, 255, 255, .06);
-                color: inherit; font: inherit; font-size: 14px; cursor: pointer; }
-  .row button.on { background: rgba(255, 255, 255, .22); border-color: rgba(255, 255, 255, .35); }
-  #closeBtn { position: absolute; top: 10px; right: 12px; background: none; border: 0; color: inherit; opacity: .6; font-size: 22px; cursor: pointer; }
-  #a2hs { display: none; font-size: 12px; opacity: .65; margin: 4px 2px 0; line-height: 1.4; }
-  #hint { position: fixed; z-index: 4; left: 0; right: 0; bottom: calc(env(safe-area-inset-bottom, 0px) + 22px); text-align: center; font-size: 13px;
-          letter-spacing: .04em; color: rgba(255, 248, 235, .0); transition: color 1.2s; pointer-events: none; text-shadow: 0 1px 8px rgba(0,0,0,.6); }
-  #hint.show { color: rgba(255, 248, 235, .75); }
-  #hint.gone { color: rgba(255, 248, 235, 0); transition: color .6s; }
-  #toast { position: fixed; z-index: 7; left: 50%; top: calc(env(safe-area-inset-top, 0px) + 64px); transform: translate(-50%, -20px); opacity: 0;
-           transition: all .35s; max-width: 86vw; padding: 10px 14px; border-radius: 14px; font-size: 13px; text-align: center; pointer-events: none; }
-  #toast.show { opacity: 1; transform: translate(-50%, 0); }
-  #fatal { position: fixed; inset: 0; display: none; align-items: center; justify-content: center; padding: 40px; text-align: center; color: #ccc; font-size: 15px; z-index: 9; }
-  #fps { position: fixed; left: 8px; top: calc(env(safe-area-inset-top, 0px) + 8px); font: 11px ui-monospace, Menlo, monospace; color: #0f0; z-index: 8; pointer-events: none; text-shadow: 0 0 3px #000; }
+         font: 15px/1.3 -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; color: var(--ink);
+         -webkit-font-smoothing: antialiased; }
+  * { -webkit-tap-highlight-color: transparent; }
+  button { font: inherit; color: inherit; -webkit-user-select: none; user-select: none; touch-action: manipulation; }
+  button:focus { outline: none; }
+  button:focus-visible { outline: 2px solid rgba(255, 255, 255, .7); outline-offset: 2px; }
+  #stage { position: fixed; inset: 0; overflow: hidden; contain: strict; }
+  #c { position: absolute; left: 0; top: 0; display: block; transform-origin: 50% 50%; touch-action: none; }
+  .glass { background: var(--glass); -webkit-backdrop-filter: blur(22px) saturate(1.4); backdrop-filter: blur(22px) saturate(1.4);
+           box-shadow: 0 0 0 .5px var(--line) inset, 0 10px 40px rgba(0, 0, 0, .35); }
+
+  /* menu button: 48px hit area, small smoked dot cluster that fades back when idle */
+  #menuBtn { position: fixed; z-index: 5; top: calc(var(--sat) + 6px); right: calc(var(--sar) + 6px); width: 48px; height: 48px;
+             padding: 0; border: 0; background: none; cursor: pointer; display: grid; place-items: center; opacity: .9; transition: opacity .8s; }
+  #menuBtn.idle { opacity: .62; }
+  #menuBtn:active { opacity: 1; transition: none; }
+  #menuBtn span { width: 34px; height: 34px; border-radius: 50%; display: grid; place-items: center;
+                  background: rgba(12, 10, 8, .58); -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px); box-shadow: 0 0 0 .5px rgba(255, 255, 255, .18) inset, 0 1px 6px rgba(0, 0, 0, .25); }
+  #menuBtn svg { width: 18px; height: 18px; }
+  body.panel-open #menuBtn { opacity: 0; pointer-events: none; }
+
+  /* bottom sheet */
+  #scrim { position: fixed; inset: 0; z-index: 5; display: none; }
+  body.panel-open #scrim { display: block; }
+  #panel { position: fixed; z-index: 6; left: 50%; bottom: calc(var(--sab) + 10px); width: min(calc(100vw - 20px - var(--sal) - var(--sar)), 430px);
+           max-height: calc(100% - var(--sat) - var(--sab) - 20px); overflow-x: hidden; overflow-y: auto; touch-action: pan-y; overscroll-behavior: contain; box-sizing: border-box;
+           transform: translate(-50%, calc(100% + 40px)); visibility: hidden;
+           transition: transform .42s cubic-bezier(.2, .9, .2, 1), visibility 0s .42s; border-radius: 28px; padding: 8px 14px 14px; }
+  body.panel-open #panel { transform: translate(-50%, 0); visibility: visible; transition: transform .42s cubic-bezier(.2, .9, .2, 1), visibility 0s; }
+  #grab { width: 36px; height: 5px; border-radius: 3px; background: rgba(255, 255, 255, .22); margin: 2px auto 10px; }
+  .lbl { margin: 0 4px 8px; font-size: 11px; letter-spacing: .1em; text-transform: uppercase; font-weight: 600; color: rgba(243, 238, 230, .5); }
+  #sands { display: grid; grid-template-columns: repeat(auto-fit, minmax(60px, 1fr)); gap: 2px; margin: 0 -4px 12px; }
+  .sand { background: none; border: 0; display: flex; flex-direction: column; align-items: center; gap: 7px; padding: 4px 0 2px; cursor: pointer; min-height: 48px; }
+  .sand i { width: 42px; height: 42px; border-radius: 50%; box-shadow: inset 0 -4px 8px rgba(0, 0, 0, .35), inset 0 2px 3px rgba(255, 255, 255, .25), 0 0 0 2px transparent, 0 0 0 4px transparent;
+            transition: box-shadow .2s, transform .2s; }
+  .sand.on i { box-shadow: inset 0 -4px 8px rgba(0, 0, 0, .35), inset 0 2px 3px rgba(255, 255, 255, .25), 0 0 0 2.5px rgba(18, 16, 14, .9), 0 0 0 4.5px rgba(255, 255, 255, .9); }
+  .sand:active i { transform: scale(.92); }
+  .sand span { font-size: 11px; color: rgba(243, 238, 230, .72); text-align: center; line-height: 1.15; max-width: 72px; }
+  .sand.on span { color: var(--ink); }
+  .seg { position: relative; display: flex; background: rgba(255, 255, 255, .07); border-radius: 14px; padding: 3px; margin-bottom: 10px; }
+  .seg button { flex: 1; height: 42px; border: 0; background: none; border-radius: 11px; font-size: 15px; font-weight: 500; cursor: pointer; position: relative; z-index: 1;
+                display: flex; align-items: center; justify-content: center; gap: 7px; color: rgba(243, 238, 230, .75); transition: color .2s; }
+  .seg button.on { color: var(--ink); }
+  .seg button svg { width: 18px; height: 18px; opacity: .9; }
+  .seg .pill { position: absolute; z-index: 0; top: 3px; bottom: 3px; left: 3px; border-radius: 11px; background: rgba(255, 255, 255, .17);
+               box-shadow: 0 1px 4px rgba(0, 0, 0, .25); transition: transform .3s cubic-bezier(.2, .9, .2, 1); }
+  .acts { display: grid; grid-template-columns: repeat(auto-fit, minmax(80px, 1fr)); gap: 8px; }
+  .acts button { height: 50px; border: 0; border-radius: 14px; background: rgba(255, 255, 255, .07); cursor: pointer; font-size: 12px; font-weight: 500;
+                 display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; color: rgba(243, 238, 230, .85); transition: background .15s; }
+  .acts button:active { background: rgba(255, 255, 255, .18); transition: none; }
+  .acts button svg { width: 20px; height: 20px; }
+  .acts button.off { color: rgba(243, 238, 230, .45); }
+  .acts button.warn { color: #ffd59a; }
+  /* short screens (phone in landscape): sand on the left, tools on the right */
+  @media (max-height: 520px) and (min-width: 560px) {
+    #panel { width: min(calc(100vw - 20px - var(--sal) - var(--sar)), 780px); padding-top: 6px; }
+    #cols { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+    #sands { margin-bottom: 4px; }
+    #grab { margin-bottom: 6px; }
+  }
+  #note { display: none; font-size: 12.5px; color: rgba(243, 238, 230, .6); margin: 12px 4px 0; line-height: 1.4; }
+  #note b { color: rgba(243, 238, 230, .85); font-weight: 600; }
+
+  #hint { position: fixed; z-index: 4; left: 50%; bottom: calc(var(--sab) + 16px); transform: translateX(-50%); width: max-content; max-width: calc(100vw - 32px);
+          text-align: center; font-size: 13px; letter-spacing: .02em; color: rgba(255, 250, 242, .92); opacity: 0; transition: opacity 1.4s; pointer-events: none;
+          padding: 7px 14px; border-radius: 16px; background: rgba(12, 10, 8, .42); -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px); box-sizing: border-box; }
+  #hint:empty { display: none; }
+  #hint.show { opacity: 1; }
+  #hint kbd { font: inherit; padding: 1px 6px; border-radius: 5px; background: rgba(0, 0, 0, .35); box-shadow: 0 0 0 .5px rgba(255, 255, 255, .25) inset; }
+  #toast.glass { background: rgba(18, 16, 14, .78); }
+  #toast { position: fixed; z-index: 7; left: 50%; top: calc(var(--sat) + 14px); transform: translate(-50%, -12px); opacity: 0; visibility: hidden;
+           transition: opacity .3s, transform .3s, visibility 0s .3s; width: max-content; max-width: min(86vw, 380px); padding: 11px 16px; border-radius: 18px;
+           font-size: 13.5px; line-height: 1.35; text-align: center; pointer-events: none; }
+  #toast.show { opacity: 1; transform: translate(-50%, 0); visibility: visible; transition: opacity .3s, transform .3s; }
+  #fatal { position: fixed; inset: 0; display: none; align-items: center; justify-content: center; padding: 40px; text-align: center; color: #bbb; font-size: 15px; z-index: 9; }
+  #fps { position: fixed; left: calc(var(--sal) + 8px); top: calc(var(--sat) + 8px); font: 11px ui-monospace, Menlo, monospace; color: #0f0; z-index: 8; pointer-events: none; text-shadow: 0 0 3px #000; white-space: pre; }
+  @media (prefers-reduced-motion: reduce) { #panel, body.panel-open #panel, .seg .pill { transition-duration: .01s; } }
 </style>
 </head>
 <body>
 <div id="stage"><canvas id="c"></canvas></div>
-<button id="menuBtn" class="glass" aria-label="Settings"><svg viewBox="0 0 24 24" fill="#f2ede4"><circle cx="5" cy="12" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="19" cy="12" r="2"/></svg></button>
-<div id="panel" class="glass">
-  <button id="closeBtn" aria-label="Close">×</button>
-  <h3>Sand</h3>
+<button id="menuBtn" aria-label="Sand and tools" aria-expanded="false"><span><svg viewBox="0 0 24 24" fill="#fffaf2"><circle cx="5.5" cy="12" r="1.9"/><circle cx="12" cy="12" r="1.9"/><circle cx="18.5" cy="12" r="1.9"/></svg></span></button>
+<div id="scrim"></div>
+<div id="panel" class="glass" role="dialog" aria-label="Sand and tools">
+  <div id="grab"></div>
+  <div id="cols"><div>
+  <div class="lbl">Sand</div>
   <div id="sands"></div>
-  <h3>Tool</h3>
-  <div class="row">
-    <button data-tool="finger" class="on">Finger</button>
-    <button data-tool="rake">Rake</button>
-    <button data-tool="pour">Pour</button>
+  </div><div>
+  <div class="lbl">Tool</div>
+  <div class="seg" id="tools">
+    <div class="pill"></div>
+    <button data-tool="finger" class="on"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M9 11V5.5a1.5 1.5 0 0 1 3 0V11m0-1.5a1.5 1.5 0 0 1 3 0V11m0-.5a1.5 1.5 0 0 1 3 0v3.5a6 6 0 0 1-6 6h-.6a6 6 0 0 1-4.6-2.2L5 14.6a1.4 1.4 0 0 1 2.1-1.9L9 14.5"/></svg>Finger</button>
+    <button data-tool="rake"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M12 3v9M5 12h14M5 12v6M9.7 12v6M14.3 12v6M19 12v6"/></svg>Rake</button>
+    <button data-tool="pour"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M7 4h10l-3.5 7v2h-3v-2z"/><path d="M12 16v.01M10.5 19v.01M13.5 19.5v.01M12 21.5v.01"/></svg>Pour</button>
   </div>
-  <div class="row">
-    <button id="smoothBtn">Smooth</button>
-    <button id="refillBtn">Fresh tray</button>
-    <button id="soundBtn" class="on">Sound</button>
-    <button id="fsBtn">Full screen</button>
+  <div class="acts">
+    <button id="smoothBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M3 9c3-2 6 2 9 0s6-2 9 0M3 15c3-2 6 2 9 0s6-2 9 0"/></svg>Smooth</button>
+    <button id="refillBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12a8 8 0 0 1 13.7-5.6L20 8.5M20 4v4.5h-4.5M20 12a8 8 0 0 1-13.7 5.6L4 15.5M4 20v-4.5h4.5"/></svg>New tray</button>
+    <button id="soundBtn" aria-pressed="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9.5h3.5L12 5.5v13l-4.5-4H4z"/><path class="w" d="M15.5 9a4 4 0 0 1 0 6M18 6.5a7.5 7.5 0 0 1 0 11"/><path class="x" d="M16 9.5l5 5m0-5l-5 5" style="display:none"/></svg><b style="font-weight:inherit">Sound</b></button>
+    <button id="tiltBtn" style="display:none"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="7" y="3" width="10" height="18" rx="2.5" transform="rotate(-14 12 12)"/><path d="M3 7.5a9 9 0 0 1 2-3M21 16.5a9 9 0 0 1-2 3"/></svg>Enable tilt</button>
+    <button id="fsBtn" style="display:none"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg>Full screen</button>
   </div>
-  <div id="a2hs">For the most immersive version, tap Share → <b>Add to Home Screen</b>. It opens full-screen with no browser bars.</div>
+  </div></div>
+  <div id="note"></div>
 </div>
-<div id="hint">sound on · ··· for sand &amp; tools</div>
-<div id="toast" class="glass"></div>
+<div id="hint"></div>
+<div id="toast" class="glass" role="status" aria-live="polite"></div>
 <div id="fatal"></div>
 <div id="fps"></div>
 <script>
@@ -118,47 +173,92 @@ float rnd(ivec2 c, uint salt){ return float(pcg(uint(c.x) + pcg(uint(c.y) + pcg(
 float newSeed(ivec2 c, uint salt){ return float(pcg(uint(c.x) * 73856093u ^ uint(c.y) * 19349663u ^ pcg(uFrame * 31u + salt)) >> 8u) * (1.0 / 16777216.0); }
 `;
 
-// ---------------------------------------------------------------------------
-// Pass 1: face velocity update (gravity, earth pressure, Coulomb friction)
-// ---------------------------------------------------------------------------
-const FS_VELOCITY = SIM_COMMON + `
+
+// Shared by the velocity and advection passes: friction coefficients and the mobile thickness of a face.
+const SIM_MOB = `
 uniform vec3 uG;       // effective gravity in sim coords, cells/s^2. xy in-plane, z = normal load (>0 presses sand onto glass)
 uniform vec4 uMu;      // x: mu static thin layer, y: mu static thick, z: kinetic/static ratio, w: earth pressure K
+uniform float uFluid;  // vibration fluidization (0..1)
+uniform vec2 uMob;     // x: rolling layer thickness (grains), y: mobile-layer model on/off
+uniform float uHmaxM;  // lid height (grains)
+uniform float uMobE;   // failure depth multiplier on the excess above the stopping slope
+uniform vec2 uBag;     // x: Bagnold speed scale v0 (cells/s), y: cap of the speed-driven depth in units of the local step
+// mobile thickness of the flow from a donor column hD into a receiver hR; gc = in-plane gravity along the flow
+float muSt(float h){ return mix(uMu.x, uMu.y, smoothstep(0.6, 3.0, h)) * (1.0 - uFluid); }
+float mob(float hD, float hR, float gc, float sp){
+  if (uMob.y < 0.5) return hD;
+  float gn = max(abs(uG.z), 1.0);
+  float muS = muSt(hD);
+  float muTh = sp > 2.0 ? muS * uMu.z : muS;
+  float slide = smoothstep(0.92, 1.04, length(uG.xy) / (muTh * abs(uG.z) + 1.0));
+  float e = min(uMobE * 0.5 * max(0.0, (hD - hR) + gc / (uMu.w * gn) - muS * uMu.z / uMu.w), max(hD - hR, 0.0));
+  // Bagnold: a flow moving at speed sp carries a layer ~ (sp / v0)^(2/3) grains thick (avalanches deepen as they speed up)
+  float hb = pow(sp / uBag.x, 0.6667);
+  float m = max(e + uMob.x, min(hb, max(hD - hR, 0.0) * uBag.y + uMob.x));
+  return max(mix(min(hD, m), hD, slide), min(hD, max(hD - uHmaxM, 0.0)));
+}
+`;
+
+// ---------------------------------------------------------------------------
+// Pass 1: face velocity update
+//   momentum advection (semi-Lagrangian on the MAC faces) -> gravity + earth pressure (cliff-limited)
+//   -> Coulomb friction with static/kinetic hysteresis and mu(I) rate strengthening -> CFL clamp.
+//   Dry faces (no sand on either side) inherit the velocity of the upstream face, so a sliding sheet's
+//   front carries its momentum instead of restarting from rest in every new cell.
+// ---------------------------------------------------------------------------
+const FS_VELOCITY = SIM_COMMON + SIM_MOB + `
 uniform float uVmax;   // CFL clamp, cells/s
 uniform float uVisc;   // velocity smoothing per substep (0..1)
-uniform float uFluid;  // vibration fluidization (0..1)
-uniform float uHmax;   // lid height (grain units)
 uniform float uLid;    // lid stiffness
 uniform float uKick;   // random agitation amplitude (cells/s)
-uniform vec2 uRate;    // mu(I)-like rate strengthening: x = extra friction at high speed, y = speed scale (cells/s)
+uniform float uExtrap; // dry-face velocity inheritance factor
+uniform vec2 uStop;    // x: min flow thickness used in the inertial number, y: speed below which static friction applies
+uniform vec4 uRate;    // x: mu(I) rate strengthening (mu2 - mu1), y: I0, z: max pressure gradient (cliff limit), w: advection on/off
 out vec4 o;
 
 float hp(float h){ return max(h - 0.8, 0.0); }          // monolayer exerts no lateral pressure
-float lidp(float h){ return max(h - uHmax, 0.0); }
+float lidp(float h){ return max(h - uHmaxM, 0.0); }
+float U(ivec2 c){ return (c.x < 0 || c.y < 0 || c.x >= uSize.x - 1 || c.y >= uSize.y) ? 0.0 : texelFetch(uState, c, 0).g; }
+float V(ivec2 c){ return (c.x < 0 || c.y < 0 || c.x >= uSize.x || c.y >= uSize.y - 1) ? 0.0 : texelFetch(uState, c, 0).b; }
+// bilinear samples of the face grids; q in face-index space (u-face (i,j) sits at x=i+1, y=j+0.5)
+float sampU(vec2 q){ ivec2 i = ivec2(floor(q)); vec2 f = q - vec2(i);
+  return mix(mix(U(i), U(i + ivec2(1, 0)), f.x), mix(U(i + ivec2(0, 1)), U(i + ivec2(1, 1)), f.x), f.y); }
+float sampV(vec2 q){ ivec2 i = ivec2(floor(q)); vec2 f = q - vec2(i);
+  return mix(mix(V(i), V(i + ivec2(1, 0)), f.x), mix(V(i + ivec2(0, 1)), V(i + ivec2(1, 1)), f.x), f.y); }
 
 // Generic face update. hA, hB: heights on both sides of the face (B is the + side).
-// sA,sB: perpendicular slopes on each side, vel: current face velocity (along-axis), perp: perpendicular velocity estimate,
-// gAlong/gPerp: in-plane gravity components.
-float faceUpdate(float hA, float hB, float slopePerp, float vel, float perp, float gAlong, float gPerp, float gN, float gMag, float neighAvg, ivec2 c, uint salt){
+float faceUpdate(float hA, float hB, float slopePerp, float vel, float perp, float gAlong, float gPerp, float gN, float gMag, float neighAvg, float upstream, ivec2 c, uint salt){
   float hf = 0.5 * (hA + hB);
-  if (max(hA, hB) < 0.01) return 0.0;
+  if (max(hA, hB) < 0.01) return clamp(upstream * uExtrap, -uVmax, uVmax);
   float K = uMu.w;
-  float aAlong = gAlong - K * gN * (hp(hB) - hp(hA)) - uLid * gMag * (lidp(hB) - lidp(hA));
-  float aPerp  = gPerp  - K * gN * slopePerp;
+  float dP = clamp(hp(hB) - hp(hA), -uRate.z, uRate.z);
+  float aAlong = gAlong - K * gN * dP - uLid * gMag * clamp(lidp(hB) - lidp(hA), -uRate.z, uRate.z);
+  float aPerp  = gPerp  - K * gN * clamp(slopePerp, -uRate.z, uRate.z);
   // smoothing of the face velocity with its neighbours (keeps the granular flow coherent)
   vel = mix(vel, neighAvg, uVisc);
-  float muS = mix(uMu.x, uMu.y, smoothstep(0.6, 3.0, hf)) * (1.0 - uFluid);
-  float packing = smoothstep(uHmax * 0.85, uHmax, hf) * length(vec2(gAlong, gPerp)) * 0.6;
+  // sand squeezed above the lid is pushed out sideways without friction holding it back
+  float over = max(lidp(hA), lidp(hB));
+  float muS = mix(uMu.x, uMu.y, smoothstep(0.6, 3.0, hf)) * (1.0 - uFluid) * (1.0 - 0.7 * smoothstep(0.0, 3.0, over));
+  float packing = smoothstep(uHmaxM * 0.85, uHmaxM, hf) * length(vec2(gAlong, gPerp)) * 0.6;
   float N = max(gN, 0.0) + packing;
   vec2 v = vec2(vel, perp);
   float sp = length(v);
-  bool moving = sp > 2.0;
+  bool moving = sp > uStop.y;
   vec2 trial = v + vec2(aAlong, aPerp) * uDt;
-  float muK = muS * uMu.z + uRate.x * sp / (sp + uRate.y);
+  // inertial number I = shear rate * d / sqrt(P / rho): shear ~ |u| / h, P ~ rho N h (d = 1 cell)
+  float hm = vel >= 0.0 ? mob(hA, hB, gAlong, sp) : mob(hB, hA, -gAlong, sp);
+  float hI = max(hm, uStop.x);
+  float I = sp / (hI * sqrt(hI * max(N, 0.05 * gMag + 1.0)));
+  float muK = muS * uMu.z + uRate.x * (1.0 - uFluid) * I / (I + uRate.y);
   float fr = (moving ? muK : muS) * N * uDt;
   float lt = length(trial);
   float nv = lt <= fr ? 0.0 : trial.x * (1.0 - fr / lt);
   nv += (rnd(c, salt) - 0.5) * uKick * smoothstep(0.3, 1.5, hf);
+  // lid: a face may not push a cell beyond the lid height in one substep (inelastic stop against packed sand)
+  float room = 0.5 * max(uHmaxM - hB, 0.5 * (lidp(hA) - lidp(hB)));
+  if (nv > 0.0) nv = min(nv, max(room, 0.0) / (max(hA, 0.05) * uDt));
+  room = 0.5 * max(uHmaxM - hA, 0.5 * (lidp(hB) - lidp(hA)));
+  if (nv < 0.0) nv = max(nv, -max(room, 0.0) / (max(hB, 0.05) * uDt));
   return clamp(nv, -uVmax, uVmax);
 }
 
@@ -169,9 +269,9 @@ void main(){
   vec4 sD = S(c + ivec2(0, 1)), sU = S(c - ivec2(0, 1));
   vec4 sRU = S(c + ivec2(1, -1)), sRD = S(c + ivec2(1, 1));
   vec4 sDL = S(c + ivec2(-1, 1)), sDR = sRD;
-  vec4 sDD = S(c + ivec2(0, 2)), sRR = S(c + ivec2(2, 0));
   float mC = AX(c).r, mR = AX(c + ivec2(1, 0)).r, mD = AX(c + ivec2(0, 1)).r;
   float gMag = length(uG);
+  float adv = uRate.w;
 
   // ---- u on right face (between c and c+x)
   float u = 0.0;
@@ -179,7 +279,10 @@ void main(){
     float vAvg = 0.25 * (sC.b + sR.b + sU.b + sRU.b);
     float slopeY = 0.25 * ((hp(sD.r) - hp(sU.r)) + (hp(sRD.r) - hp(sRU.r)));
     float nAvg = 0.25 * (sL.g + sR.g + sU.g + sD.g);
-    u = faceUpdate(sC.r, sR.r, slopeY, sC.g, vAvg, uG.x, uG.y, uG.z, gMag, nAvg, c, 101u);
+    float u0 = sC.g;
+    if (adv > 0.5) u0 = sampU(vec2(c) - vec2(sC.g, vAvg) * uDt);
+    float up = max(sL.g, 0.0) + min(sR.g, 0.0);
+    u = faceUpdate(sC.r, sR.r, slopeY, u0, vAvg, uG.x, uG.y, abs(uG.z), gMag, nAvg, up, c, 101u);
   }
   // ---- v on bottom face (between c and c+y)
   float v = 0.0;
@@ -188,7 +291,10 @@ void main(){
     float uAvg = 0.25 * (sC.g + sD.g + sLx.g + sDL.g);
     float slopeX = 0.25 * ((hp(sR.r) - hp(sL.r)) + (hp(sDR.r) - hp(sDL.r)));
     float nAvg = 0.25 * (sU.b + sD.b + sL.b + sR.b);
-    v = faceUpdate(sC.r, sD.r, slopeX, sC.b, uAvg, uG.y, uG.x, uG.z, gMag, nAvg, c, 202u);
+    float v0 = sC.b;
+    if (adv > 0.5) v0 = sampV(vec2(c) - vec2(uAvg, sC.b) * uDt);
+    float up = max(sU.b, 0.0) + min(sD.b, 0.0);
+    v = faceUpdate(sC.r, sD.r, slopeX, v0, uAvg, uG.y, uG.x, abs(uG.z), gMag, nAvg, up, c, 202u);
   }
   o = vec4(sC.r, u, v, sC.a);
 }
@@ -197,16 +303,30 @@ void main(){
 // ---------------------------------------------------------------------------
 // Pass 2: conservative mass transport (upwind fluxes with outflow limiting)
 //         + stochastic transport of the visible grain identities
+// Mobile thickness: a column only slides as a whole on the glass when the in-plane gravity beats basal
+// friction (tilt / shake / vibration). Otherwise only the surface layer above the stopping slope (plus a thin
+// rolling layer) can be carried by the face velocity, so steep features avalanche at their surface while the
+// base stays put (piles, ridges and rake lines keep their shape instead of spreading out from the bottom).
 // ---------------------------------------------------------------------------
-const FS_ADVECT = SIM_COMMON + `
+const FS_ADVECT = SIM_COMMON + SIM_MOB + `
+uniform float uSeedMix;  // fraction of grain copies that get a fresh identity (mixing in the flowing layer)
 out vec4 o;
 float kOf(ivec2 c){
   if (c.x < 0 || c.y < 0 || c.x >= uSize.x || c.y >= uSize.y) return 0.0;
   vec4 s = texelFetch(uState, c, 0);
+  float h = s.r;
+  if (h <= 0.0) return 1.0;
+  float uR = c.x < uSize.x - 1 ? s.g : 0.0;
+  float vD = c.y < uSize.y - 1 ? s.b : 0.0;
   float uL = c.x > 0 ? texelFetch(uState, c - ivec2(1, 0), 0).g : 0.0;
   float vU = c.y > 0 ? texelFetch(uState, c - ivec2(0, 1), 0).b : 0.0;
-  float outF = (max(s.g, 0.0) + max(-uL, 0.0) + max(s.b, 0.0) + max(-vU, 0.0)) * uDt;
-  return outF > 1.0 ? 1.0 / outF : 1.0;
+  float outV = 0.0;
+  if (uR > 0.0) outV += uR * mob(h, S(c + ivec2(1, 0)).r, uG.x, uR);
+  if (uL < 0.0) outV -= uL * mob(h, S(c - ivec2(1, 0)).r, -uG.x, -uL);
+  if (vD > 0.0) outV += vD * mob(h, S(c + ivec2(0, 1)).r, uG.y, vD);
+  if (vU < 0.0) outV -= vU * mob(h, S(c - ivec2(0, 1)).r, -uG.y, -vU);
+  outV *= uDt;
+  return outV > h ? h / outV : 1.0;
 }
 void main(){
   ivec2 c = ivec2(gl_FragCoord.xy);
@@ -219,47 +339,78 @@ void main(){
   float uL = hasL ? sL.g : 0.0;
   float vU = hasU ? sU.b : 0.0;
   float kC = kOf(c), kL = kOf(c - ivec2(1, 0)), kR = kOf(c + ivec2(1, 0)), kU = kOf(c - ivec2(0, 1)), kD = kOf(c + ivec2(0, 1));
-  float FR = uDt * uR * (uR > 0.0 ? h * kC : sR.r * kR);
-  float FL = uDt * uL * (uL > 0.0 ? sL.r * kL : h * kC);
-  float FD = uDt * vD * (vD > 0.0 ? h * kC : sD.r * kD);
-  float FU = uDt * vU * (vU > 0.0 ? sU.r * kU : h * kC);
+  float FR = uDt * uR * (uR > 0.0 ? mob(h, sR.r, uG.x, uR) * kC : mob(sR.r, h, -uG.x, -uR) * kR);
+  float FL = uDt * uL * (uL > 0.0 ? mob(sL.r, h, uG.x, uL) * kL : mob(h, sL.r, -uG.x, -uL) * kC);
+  float FD = uDt * vD * (vD > 0.0 ? mob(h, sD.r, uG.y, vD) * kC : mob(sD.r, h, -uG.y, -vD) * kD);
+  float FU = uDt * vU * (vU > 0.0 ? mob(sU.r, h, uG.y, vU) * kU : mob(h, sU.r, -uG.y, -vU) * kC);
   float hn = max(h - FR + FL - FD + FU, 0.0);
 
-  // grain identity transport: probability = fraction of a cell width transported in this substep
+  // grain identity transport: probability = fraction of a cell width transported in this substep.
+  // An incoming grain covers the cell (copy), but part of the flowing layer is reshuffled (fresh identity) so a
+  // single grain is not cloned into a streak; when the top grain leaves, the one exposed underneath is new.
   float pL = max(uL, 0.0) * uDt * kL * step(0.02, sL.r);
   float pR = max(-uR, 0.0) * uDt * kR * step(0.02, sR.r);
   float pU = max(vU, 0.0) * uDt * kU * step(0.02, sU.r);
   float pD = max(-vD, 0.0) * uDt * kD * step(0.02, sD.r);
+  float pO = (max(uR, 0.0) + max(-uL, 0.0) + max(vD, 0.0) + max(-vU, 0.0)) * uDt * kC * step(0.02, h);
   float r = rnd(c, 11u);
   float seed = sC.a;
-  if (r < pL) seed = sL.a;
-  else if (r < pL + pR) seed = sR.a;
-  else if (r < pL + pR + pU) seed = sU.a;
-  else if (r < pL + pR + pU + pD) seed = sD.a;
-  else {
+  float pIn = pL + pR + pU + pD;
+  if (r < pIn) {
+    if (rnd(c, 19u) < uSeedMix) seed = newSeed(c, 23u);
+    else if (r < pL) seed = sL.a;
+    else if (r < pL + pR) seed = sR.a;
+    else if (r < pL + pR + pU) seed = sU.a;
+    else seed = sD.a;
+  } else if (r < pIn + pO) {
+    seed = newSeed(c, 17u);
+  } else {
     float loss = max(h - hn, 0.0);
-    if (rnd(c, 13u) < loss) seed = newSeed(c, 17u);
+    if (rnd(c, 13u) < loss) seed = newSeed(c, 29u);
   }
   o = vec4(hn, sC.g, sC.b, seed);
 }
 `;
 
 // ---------------------------------------------------------------------------
-// Pass 0 (once per frame): contact footprints (fingers / rake tines) displace sand to their rims,
-// pouring adds sand, dust bookkeeping, global mass correction.
+// Pass 0a (once per frame): contact footprints (fingers / rake tines). Writes AUX only:
+//   r = inside mask, g = dust, b = mass removed from the footprint, a = UNNORMALISED rim deposit.
+// The rim deposit is gathered along rays from the capsule axis through the footprint and spread over a band
+// outside it (bow wave / berms / crater ring). A GPU reduction then sums removed (b) and deposited (a) mass and
+// pass 0b scales the deposit by removed/deposited, so plowing conserves mass exactly (whatever the footprint
+// overlap, discretisation or screen-edge clipping).
 // ---------------------------------------------------------------------------
 const FS_CONTACT = SIM_COMMON + `
-layout(location = 0) out vec4 oState;
-layout(location = 1) out vec4 oAux;
+out vec4 oAux;
 uniform vec4 uSeg[16];
 uniform float uSegR[16];
+uniform float uSegCut[16]; // plow depth below the undisturbed surface ahead (grains); >= 1e3 = down to the glass
 uniform int uNSeg;
-uniform vec4 uPour;      // xy center (cells), z radius, w peak height added this frame
 uniform float uMassCorr;
 uniform float uFrameDt;
 float bilH(vec2 q){
   q -= 0.5; vec2 f = fract(q); ivec2 i = ivec2(floor(q));
   return mix(mix(S(i).r, S(i + ivec2(1, 0)).r, f.x), mix(S(i + ivec2(0, 1)).r, S(i + ivec2(1, 1)).r, f.x), f.y);
+}
+// unnormalised deposit at point pp from segment sg (radius R): material gathered along the ray from the axis
+// through the footprint, spread over a band of width B outside the footprint with a linear falloff
+float depAt(vec2 pp, vec4 sg, float R){
+  vec2 ab = sg.zw - sg.xy;
+  float L2 = dot(ab, ab);
+  float t = L2 > 1e-6 ? clamp(dot(pp - sg.xy, ab) / L2, 0.0, 1.0) : 0.0;
+  vec2 q = sg.xy + ab * t;
+  vec2 dv = pp - q; float rho = max(length(dv), 1e-3);
+  float d = rho - R;
+  float B = max(3.0, R * 0.9);
+  if (d < 0.0 || d >= B) return 0.0;
+  bool cap = (L2 < 1e-6) || t <= 0.0 || t >= 1.0;
+  vec2 n = dv / rho;
+  float sum = 0.0;
+  for (float sd = 0.5; sd < 96.0; sd += 1.0) {
+    if (sd >= R) break;
+    sum += bilH(q + n * sd) * (cap ? sd / rho : 1.0);
+  }
+  return sum * 2.0 * (B - d) / (B * B);
 }
 void main(){
   ivec2 c = ivec2(gl_FragCoord.xy);
@@ -267,36 +418,70 @@ void main(){
   vec4 s = S(c);
   vec4 a = AX(c);
   float h = s.r * uMassCorr;
-  float seed = s.a;
-  float bestD = 1e9; vec2 axisP = vec2(0.0); float R = 1.0; bool cap = true;
+  float bestD = 1e9; int bi = 0;
   for (int i = 0; i < 16; i++) {
     if (i >= uNSeg) break;
     vec4 sg = uSeg[i];
     vec2 ab = sg.zw - sg.xy;
     float L2 = dot(ab, ab);
     float t = L2 > 1e-6 ? clamp(dot(p - sg.xy, ab) / L2, 0.0, 1.0) : 0.0;
-    vec2 q = sg.xy + ab * t;
-    float d = length(p - q) - uSegR[i];
-    if (d < bestD) { bestD = d; axisP = q; R = uSegR[i]; cap = (L2 < 1e-6) || t <= 0.0 || t >= 1.0; }
+    float d = length(p - (sg.xy + ab * t)) - uSegR[i];
+    if (d < bestD) { bestD = d; bi = i; }
   }
-  float inside = 0.0, plow = 0.0;
+  float inside = 0.0, plow = 0.0, dep = 0.0;
+  vec4 sg = uSeg[0]; float R = uSegR[0], cut = uSegCut[0];
+  for (int i = 0; i < 16; i++) if (i == bi) { sg = uSeg[i]; R = uSegR[i]; cut = uSegCut[i]; }
   if (bestD < 0.0) {
-    plow = h; h = 0.0; inside = 1.0;
-  } else {
-    float B = max(3.0, R * 0.9);
-    if (bestD < B) {
-      vec2 dv = p - axisP; float rho = max(length(dv), 1e-3); vec2 n = dv / rho;
-      float sum = 0.0;
-      for (float sd = 0.5; sd < 96.0; sd += 1.0) {
-        if (sd >= R) break;
-        sum += bilH(axisP + n * sd) * (cap ? sd / rho : 1.0);
-      }
-      sum *= uMassCorr;
-      float w = 2.0 * (B - bestD) / (B * B);
-      float add = sum * w;
-      h += add;
-      if (rnd(c, 5u) < add * 0.7) seed = newSeed(c, 7u);
+    inside = 1.0;
+    float fl = 0.0;
+    if (cut < 1e3) {
+      // reference level: untouched sand just ahead of the tool at the same lateral offset (or around it if still)
+      vec2 ab = sg.zw - sg.xy; float L = length(ab);
+      vec2 ref;
+      if (L > 0.5) { vec2 ut = ab / L; vec2 nl = vec2(-ut.y, ut.x); float lat = clamp(dot(p - sg.zw, nl), -R, R);
+        ref = sg.zw + nl * lat + ut * (sqrt(max(R * R - lat * lat, 0.0)) + 1.5); }
+      else { vec2 dv = p - sg.xy; float rl = length(dv); ref = sg.xy + (rl > 1e-3 ? dv / rl : vec2(1.0, 0.0)) * (R + 1.5); }
+      fl = max(bilH(ref) * uMassCorr - cut, 0.0);
     }
+    plow = max(h - fl, 0.0);
+  } else if (uNSeg > 0) {
+    if (bestD < max(3.0, R * 0.9) + R) {
+      // box filter along the motion over the step length: removes the per-frame washboard
+      vec2 ab = sg.zw - sg.xy; float L = length(ab);
+      vec2 ut = L > 1e-3 ? ab / L : vec2(0.0);
+      float Ls = min(L, 2.0 * R);
+      for (int k = 0; k < 5; k++) dep += depAt(p + ut * Ls * (float(k) * 0.25 - 0.5), sg, R);
+      dep *= 0.2 * uMassCorr;
+    }
+  }
+  float dust = a.g;
+  if (inside > 0.5) dust *= exp(-5.0 * uFrameDt);
+  else if (h > 0.6) dust += (0.75 - dust) * (1.0 - exp(-0.04 * uFrameDt));
+  oAux = vec4(inside, dust, plow, dep);
+}
+`;
+
+// Pass 0b: apply footprint removal + normalised rim deposit, pouring, global mass correction.
+const FS_CONTACT2 = SIM_COMMON + `
+out vec4 oState;
+uniform sampler2D uSum;  // 1x1: b = total removed, a = total unnormalised deposit
+uniform vec4 uPour;      // xy center (cells), z radius, w peak height added this frame
+uniform float uMassCorr;
+void main(){
+  ivec2 c = ivec2(gl_FragCoord.xy);
+  vec2 p = vec2(c) + 0.5;
+  vec4 s = S(c);
+  vec4 a = AX(c);
+  vec4 tot = texelFetch(uSum, ivec2(0), 0);
+  float h = s.r * uMassCorr;
+  float seed = s.a;
+  bool inside = a.r > 0.5;
+  bool canDeposit = tot.a > 1e-4 * tot.b + 1e-6;   // otherwise keep the sand where it is (no silent loss)
+  if (inside) { if (canDeposit) h = max(h - a.b, 0.0); }
+  else if (a.a > 0.0 && canDeposit) {
+    float add = a.a * tot.b / tot.a;
+    h += add;
+    if (rnd(c, 5u) < add * 0.7) seed = newSeed(c, 7u);
   }
   if (uPour.w > 0.0) {
     vec2 dp = p - uPour.xy;
@@ -304,11 +489,7 @@ void main(){
     h += add;
     if (rnd(c, 9u) < add * 2.0) seed = newSeed(c, 3u);
   }
-  float dust = a.g;
-  if (inside > 0.5) dust *= exp(-5.0 * uFrameDt);
-  else if (h > 0.6) dust += (0.75 - dust) * (1.0 - exp(-0.04 * uFrameDt));
-  oState = vec4(h, inside > 0.5 ? 0.0 : s.g, inside > 0.5 ? 0.0 : s.b, seed);
-  oAux = vec4(inside, dust, plow, 0.0);
+  oState = vec4(h, inside ? 0.0 : s.g, inside ? 0.0 : s.b, seed);
 }
 `;
 
@@ -331,6 +512,17 @@ void main(){
   o = acc;
 }
 `;
+// sums a whole (small) texture into one texel
+const FS_REDUCE_ALL = GLSL_HEAD + `
+uniform sampler2D uSrc; uniform ivec2 uSrcSize;
+out vec4 o;
+void main(){
+  vec4 acc = vec4(0.0);
+  for (int j = 0; j < 64; j++) { if (j >= uSrcSize.y) break;
+    for (int i = 0; i < 64; i++) { if (i >= uSrcSize.x) break; acc += texelFetch(uSrc, ivec2(i, j), 0); } }
+  o = acc;
+}
+`;
 const FS_REDUCE = GLSL_HEAD + `
 uniform sampler2D uSrc; uniform ivec2 uSrcSize;
 out vec4 o;
@@ -348,58 +540,103 @@ void main(){
 // ---- 20_shaders_render.js
 // ============================================================================
 // RENDER SHADERS
-// Surf texture (RGBA16F, sim res, LINEAR): r = height, g = soft shadow, b = ambient occlusion, a = flow speed
+// SURF pass (sim res, two RGBA16F LINEAR targets):
+//   surf  : r = height, g = light-ray clearance (penumbra units; shadow = clamp(0.5+g)), b = ambient occlusion, a = flow speed (cells/s)
+//   surf2 : rg = grad of macro height h, ba = grad of the grain-packing micro-relief (Sobel-smoothed)
+// RENDER pass (device res): grains + macro relief + bare glass.
 // ============================================================================
 
-const FS_SURF = SIM_COMMON + `
-uniform vec3 uLs;   // light direction in sim coords (x right, y down, z toward viewer), normalized
+
+// Micro-relief of the packing at the scale of a few grains, derived from the identities of the surface grains
+// (so it is static while the sand rests and re-randomises where the sand flows). Fades out on thin layers.
+const FS_ROUGH = SIM_COMMON + `
+uniform float uRoughAmp;
 out vec4 o;
+// hash of (grain identity, cell): static while the sand rests, re-drawn wherever grains move, and duplicated identities
+// left by the stochastic transport do not produce streaks
+float hsh(vec4 st, ivec2 q){ return float(pcg(uint(st.a * 16777216.0) ^ (uint(q.x) * 0x9E3779B1u + uint(q.y) * 0x85EBCA77u))) * (1.0 / 4294967296.0); }
+void main(){
+  ivec2 c = ivec2(gl_FragCoord.xy);
+  float acc = 0.0;
+  for (int j = -1; j <= 1; j++) for (int i = -1; i <= 1; i++) {
+    float w = (i == 0 ? 2.0 : 1.0) * (j == 0 ? 2.0 : 1.0);
+    ivec2 q = clamp(c + ivec2(i, j), ivec2(0), uSize - 1);
+    acc += w * hsh(S(q), q);
+  }
+  vec4 s = S(c);
+  // flowing sand is dilated and its surface constantly re-sorted: relief of the packing is smoothed out
+  float spd = length(s.gb);
+  float amp = uRoughAmp * smoothstep(0.8, 3.0, s.r) * mix(1.0, 0.35, smoothstep(4.0, 40.0, spd));
+  float r = amp * (acc / 16.0 - 0.5);
+  o = vec4(s.r + r, r, 0.0, 0.0);
+}
+`;
+
+const FS_SURF = SIM_COMMON + `
+uniform sampler2D uRoughT;
+uniform vec2 uAO;
+uniform vec3 uLs;   // light direction in sim coords (x right, y down, z toward viewer), normalized
+layout(location = 0) out vec4 o;
+layout(location = 1) out vec4 o2;
+// surface height incl. micro-relief
+float H(ivec2 c){ return texelFetch(uRoughT, clamp(c, ivec2(0), uSize - 1), 0).r; }   // h + micro-relief
 float bilH(vec2 q){
   q -= 0.5; vec2 f = fract(q); ivec2 i = ivec2(floor(q));
-  return mix(mix(S(i).r, S(i + ivec2(1, 0)).r, f.x), mix(S(i + ivec2(0, 1)).r, S(i + ivec2(1, 1)).r, f.x), f.y);
+  return mix(mix(H(i), H(i + ivec2(1, 0)), f.x), mix(H(i + ivec2(0, 1)), H(i + ivec2(1, 1)), f.x), f.y);
 }
 void main(){
   ivec2 c = ivec2(gl_FragCoord.xy);
   vec2 p = vec2(c) + 0.5;
   vec4 s = S(c);
-  float h = s.r;
-  // soft heightfield shadow
+  float h = H(c);
+  // 3x3 neighbourhood: Sobel gradients of the macro height and of the micro-relief (kept separate)
+  float gx = 0.0, gy = 0.0, rx = 0.0, ry = 0.0;
+  for (int j = -1; j <= 1; j++) for (int i = -1; i <= 1; i++) {
+    if (i == 0 && j == 0) continue;
+    ivec2 q = clamp(c + ivec2(i, j), ivec2(0), uSize - 1);
+    float w = (i == 0 || j == 0) ? 0.25 : 0.125;
+    float hq = texelFetch(uState, q, 0).r, rq = texelFetch(uRoughT, q, 0).g;
+    gx += float(i) * w * hq; gy += float(j) * w * hq;
+    rx += float(i) * w * rq; ry += float(j) * w * rq;
+  }
+  // soft heightfield shadow (penumbra grows with distance to the occluder)
   float lxy = max(length(uLs.xy), 1e-3);
   vec2 dir = uLs.xy / lxy;
   float rise = uLs.z / lxy;
-  float h0 = h + 0.35;
-  float sh = 1.0;
+  float h0 = h + 0.3;
+  float sh = 4.0;   // clearance of the light ray above the terrain, in penumbra widths (signed, unclamped -> per-grain shadow edges)
   float t = 0.75;
-  for (int i = 0; i < 22; i++) {
+  for (int i = 0; i < 24; i++) {
     vec2 q = p + dir * t;
     if (q.x < 0.0 || q.y < 0.0 || q.x > float(uSize.x) || q.y > float(uSize.y)) break;
     float ray = h0 + rise * t;
     float hq = bilH(q);
-    sh = min(sh, clamp(0.5 + (ray - hq) / (0.3 + 0.16 * t), 0.0, 1.0));
-    if (ray > 160.0) break;
-    t += 0.75 + t * 0.2;
+    sh = min(sh, (ray - hq) / (0.25 + 0.12 * t));
+    if (ray > 120.0) break;
+    t += 0.7 + t * 0.18;
   }
-  // ambient occlusion (two rings)
+  // ambient occlusion (two rings, horizon-ish)
   float a1 = 0.0, a2 = 0.0;
   for (int k = 0; k < 8; k++) {
     float an = float(k) * 0.785398 + 0.39;
     vec2 d = vec2(cos(an), sin(an));
-    a1 += bilH(p + d * 2.5);
-    a2 += bilH(p + d * 7.0);
+    a1 += max(bilH(p + d * 2.5) - h, 0.0);
+    a2 += max(bilH(p + d * 7.0) - h, 0.0);
   }
   a1 *= 0.125; a2 *= 0.125;
-  float occ = clamp((a1 - h) * 0.10 + (a2 - h) * 0.035, 0.0, 0.65);
-  float ao = 1.0 - occ;
+  float ao = 1.0 - clamp(a1 * uAO.x + a2 * uAO.y, 0.0, 0.75);
   float uL = c.x > 0 ? S(c - ivec2(1, 0)).g : 0.0;
   float vU = c.y > 0 ? S(c - ivec2(0, 1)).b : 0.0;
   float sp = length(vec2(0.5 * (s.g + uL), 0.5 * (s.b + vU)));
-  o = vec4(h, sh, ao, sp);
+  o = vec4(s.r, clamp(sh, -4.0, 4.0), ao, sp);
+  o2 = vec4(gx, gy, rx, ry);
 }
 `;
 
 const FS_RENDER = GLSL_HEAD + `
 uniform sampler2D uState;   // nearest, for grain identities
 uniform sampler2D uSurf;    // linear
+uniform sampler2D uSurf2;   // linear (gradient)
 uniform sampler2D uAux;     // nearest (dust)
 uniform ivec2 uSize;
 uniform vec2 uRes;          // canvas px
@@ -414,6 +651,19 @@ uniform float uEye;         // eye distance in cells
 uniform vec3 uMinCol[6];
 uniform vec4 uMinProp[6];   // x cumulative probability, y roughness, z translucency, w sparkle probability
 uniform vec3 uMeanCol;
+uniform float uAlbVar;      // per-grain albedo variation (fraction)
+uniform float uRelief;      // vertical scatter of grains in the packing (cells)
+uniform float uPack;        // grain radius / cell (packing density of the top layer)
+uniform float uGrainN;      // strength of per-grain curvature in the normal
+uniform float uFacet;       // random facet tilt per grain
+uniform int uDebug;
+uniform float uMottle;      // texture inside grains (frosting, inclusions)
+uniform float uAngular;     // outline irregularity (rounded beach grains .. angular crushed rock)
+uniform float uSpec;        // specular strength (frosted desert grains .. glassy volcanic)
+uniform float uDesat;       // share of per-channel tonemapping (highlight desaturation)
+uniform float uGrainShMin;  // light left in grain-cast shadows (translucent quartz, interreflection)
+uniform float uMicroN;      // weight of micro-relief slopes in the shading normal
+uniform float uGapLight;    // relative ambient light reaching the deepest visible gaps
 out vec4 frag;
 
 uint pcg(uint v){ uint s = v * 747796405u + 2891336453u; uint w = ((s >> ((s >> 28u) + 4u)) ^ s) * 277803737u; return (w >> 22u) ^ w; }
@@ -437,127 +687,229 @@ vec4 bicubic(sampler2D t, vec2 p){
   float sx = s.x / (s.x + s.y), sy = s.z / (s.z + s.w);
   return mix(mix(s3, s2, sx), mix(s1, s0, sx), sy);
 }
+// cheap lattice hash for value noise
+float hq(vec2 p){ uvec2 q = uvec2(ivec2(p)); uint h = q.x * 0x27d4eb2du ^ q.y * 0x165667b1u; h ^= h >> 15; h *= 0x85ebca6bu; h ^= h >> 13; return u2f(h); }
 float vnoise(vec2 p){
   vec2 i = floor(p), f = fract(p); f = f * f * (3.0 - 2.0 * f);
-  return mix(mix(hash2(i), hash2(i + vec2(1, 0)), f.x), mix(hash2(i + vec2(0, 1)), hash2(i + vec2(1, 1)), f.x), f.y);
+  return mix(mix(hq(i), hq(i + vec2(1, 0)), f.x), mix(hq(i + vec2(0, 1)), hq(i + vec2(1, 1)), f.x), f.y);
 }
+// filmic curve (ACES fit, Narkowicz)
 vec3 aces(vec3 x){ return clamp((x * (2.51 * x + 0.03)) / (x * (2.43 * x + 0.59) + 0.14), 0.0, 1.0); }
+
+// Grain = rounded, slightly irregular ellipsoidal dome. Local frame: cs = (cos,sin) of orientation, sc = semi-axes.
+// irr = amplitude of 3-lobed outline irregularity (cos/sin parts). Returns height above the bed (or -1e9 outside).
+float dome(vec2 p, vec2 ctr, vec2 cs, vec2 sc, vec2 irr, float zTop, out float d2, out vec2 grad){
+  vec2 dv = p - ctr;
+  vec2 q = vec2(dot(dv, cs), dot(dv, vec2(-cs.y, cs.x))) / sc;
+  float r2 = dot(q, q);
+  float ir = inversesqrt(max(r2, 1e-8));
+  float c = q.x * ir, s = q.y * ir;
+  float k = 1.0 + irr.x * c * (4.0 * c * c - 3.0) + irr.y * s * (3.0 - 4.0 * s * s);
+  d2 = r2 / (k * k);
+  if (d2 >= 1.0) { grad = vec2(0.0); return -1e9; }
+  float zr = sqrt(1.0 - d2);
+  vec2 dzdq = -zTop * q / (max(zr, 0.18) * k * k);
+  vec2 dl = dzdq / sc;
+  grad = cs * dl.x + vec2(-cs.y, cs.x) * dl.y;
+  return zTop * zr;
+}
+float domeH(vec2 p, vec2 ctr, vec2 cs, vec2 sc, float zTop){
+  vec2 dv = p - ctr;
+  vec2 q = vec2(dot(dv, cs), dot(dv, vec2(-cs.y, cs.x))) / sc;
+  float d2 = dot(q, q);
+  return d2 < 1.0 ? zTop * sqrt(1.0 - d2) : -1e9;
+}
+
+struct Gr { float s, z, d2, rad, top; vec2 g; uint key; vec2 q; uint pk; };
+void consider(Gr c, inout Gr A, inout Gr B){
+  if (c.s > A.s) { B = A; A = c; } else if (c.s > B.s) { B = c; }
+}
+// mineral of a grain identity: albedo (with per-grain variation) and optical properties
+// mineral (and sparkle facet) follow the grain identity; the small albedo/tint scatter follows the pose hash, so runs of
+// duplicated identities left behind by the stochastic transport do not read as streaks of identical grains
+vec3 grainAlbedo(uint key, uint pk, out vec4 prop, out uint m5){
+  uint m1 = pcg(key ^ 0x27d4eb2du);
+  uint m2 = pcg(pk ^ 0x51ed270bu), m3 = m2 >> 9u;
+  m5 = pcg(m1);
+  float rm = u2f(m1);
+  vec3 alb = uMinCol[5]; prop = uMinProp[5];
+  for (int k = 0; k < 6; k++) { if (rm < uMinProp[k].x) { alb = uMinCol[k]; prop = uMinProp[k]; break; } }
+  alb *= 1.0 + uAlbVar * (u2f(m2) - 0.5) * 2.0;
+  alb *= mix(vec3(0.97, 1.0, 1.04), vec3(1.03, 1.0, 0.95), float(m3 & 1023u) / 1023.0);
+  return alb;
+}
 
 void main(){
   vec2 p = vec2(gl_FragCoord.x, uRes.y - gl_FragCoord.y) / uCellPx;   // cell coords, y down
   // ---- macro surface
   vec4 sf = bicubic(uSurf, p);
-  float hM = sf.r;
-  float e = 0.8;
-  float hx = (bicubic(uSurf, p + vec2(e, 0.0)).r - bicubic(uSurf, p - vec2(e, 0.0)).r) / (2.0 * e);
-  float hy = (bicubic(uSurf, p + vec2(0.0, e)).r - bicubic(uSurf, p - vec2(0.0, e)).r) / (2.0 * e);
-  float shM = sf.g, aoM = sf.b;
+  vec4 sg = bicubic(uSurf2, p);
+  float hM = sf.r, clr = sf.g, aoM = sf.b, spd = sf.a;
+  float shM = clamp(0.5 + clr, 0.0, 1.0);
+  float hx = sg.x + sg.z * uMicroN, hy = sg.y + sg.w * uMicroN;
 
-  // ---- grains: union of domes on a jittered grid, identities from the state texture
+  vec3 L = normalize(uLs);
+  float lxy = max(length(L.xy), 1e-3);
+  vec2 ldir = L.xy / lxy;
+  float rise = L.z / lxy;
+  const float T1 = 0.32, T2 = 0.7;
+  vec2 ps1 = p + ldir * T1, ps2 = p + ldir * T2;
+
+  // ---- grains: top layer (one per cell, jittered) + bed layer (one per cell corner, lower).
+  // A = front-most grain at this pixel, B = the one behind it (for anti-aliased outlines).
   ivec2 ci = ivec2(floor(p));
-  float bestZ = -1e9; vec2 bestG = vec2(0.0); float bestD2 = 1.0; uint bestId = 0u; float bestRad = 0.5;
-  float nearEdge = 1e9;
+  Gr A = Gr(-1e9, -1e9, 1.0, 0.5, 0.5, vec2(0.0), 0u, vec2(0.0), 0u);
+  Gr B = A;
+  float occ = -1e9;          // highest top-grain surface seen toward the light (minus ray rise)
+  float nearEdge = 1e9;      // distance (cells) to the nearest top-grain outline (contact shadow on glass)
   for (int j = -1; j <= 1; j++) for (int i = -1; i <= 1; i++) {
     ivec2 nc = ci + ivec2(i, j);
     if (nc.x < 0 || nc.y < 0 || nc.x >= uSize.x || nc.y >= uSize.y) continue;
     vec4 st = texelFetch(uState, nc, 0);
-    if (st.r < 0.02) continue;
+    float h = st.r;
+    if (h < 0.02) continue;
     uint id = uint(st.a * 16777216.0);
-    uint k1 = pcg(id ^ 0x5bd1e995u);
-    uint k2 = pcg(k1), k3 = pcg(k2), k4 = pcg(k3), k5 = pcg(k4);
-    float r1 = u2f(k1), r2 = u2f(k2), r3 = u2f(k3), r4 = u2f(k4), r5 = u2f(k5);
-    if (st.r < 1.0 && r1 > st.r) continue;                     // sparse coverage of thin layers
-    uint k6 = pcg(k5), k7 = pcg(k6), k8 = pcg(k7);
-    vec2 ctr = vec2(nc) + 0.5 + (vec2(r2, r3) - 0.5) * 0.64;
-    float sz = 0.75 + 0.5 * r4;
-    float rr = u2f(k8);
-    if (rr < 0.06) sz *= 1.35; else if (rr < 0.2) sz *= 0.62;
-    float rad = uGrainR * sz * 0.64;
-    float ang = r5 * 6.2831853;
-    vec2 cs = vec2(cos(ang), sin(ang));
-    vec2 dv = p - ctr;
-    vec2 lq = vec2(dot(dv, cs), dot(dv, vec2(-cs.y, cs.x)));
-    float asp = 0.7 + 0.3 * u2f(k6);
-    vec2 sc = vec2(rad, rad * asp);
-    vec2 q = lq / sc;
-    float th = atan(q.y, q.x);
-    float ph = u2f(k7) * 6.2831853;
-    float irr = 1.0 + 0.11 * sin(3.0 * th + ph) + 0.06 * sin(5.0 * th + ph * 1.7);
-    float d2 = dot(q, q) / (irr * irr);
-    nearEdge = min(nearEdge, (sqrt(d2) - 1.0) * rad);
-    if (d2 < 1.0) {
-      float zr = sqrt(max(1.0 - d2, 0.0));
-      float z = (u2f(pcg(k8)) - 0.5) * 0.3 * rad + rad * 0.9 * zr;
-      if (z > bestZ) {
-        bestZ = z; bestD2 = d2; bestId = id; bestRad = rad;
-        // gradient of the dome height w.r.t. p
-        vec2 dzdq = -rad * 0.9 * q / max(zr, 0.12) / (irr * irr);
-        vec2 dzdl = dzdq / sc;
-        bestG = cs * dzdl.x + vec2(-cs.y, cs.x) * dzdl.y;
-      }
+    // Identity (mineral, colour, size) travels with the grain; its pose (offset, orientation, seating) is re-drawn
+    // per cell, so a grain copied into a neighbouring cell by the flow appears tumbled rather than duplicated.
+    uint kp = pcg(id ^ (uint(nc.x) * 0x9E3779B1u + uint(nc.y) * 0x85EBCA77u));
+    // few hashes, several 8-bit random numbers each (keeps the per-pixel cost low)
+    uint k1 = pcg(kp), k2 = pcg(k1), k8 = pcg(id ^ 0x68e31da4u);
+    vec4 R1 = vec4(uvec4(k1, k1 >> 8u, k1 >> 16u, k1 >> 24u) & 255u) * (1.0 / 256.0) + (0.5 / 256.0);
+    vec4 R2 = vec4(uvec4(k2, k2 >> 8u, k2 >> 16u, k2 >> 24u) & 255u) * (1.0 / 256.0) + (0.5 / 256.0);
+    vec4 R8 = vec4(uvec4(k8, k8 >> 8u, k8 >> 16u, k8 >> 24u) & 255u) * (1.0 / 256.0) + (0.5 / 256.0);
+    float r1 = R1.x, r2 = R1.y, r3 = R1.z, r4 = R1.w, r6 = R2.x, r7 = R2.y;
+    // size distribution: well sorted, slightly skewed (a few coarse and fine grains); size/thin-layer presence
+    // belong to the identity
+    float sz = 0.86 + 0.28 * R8.y;
+    if (R8.x < 0.05) sz *= 1.25; else if (R8.x < 0.17) sz *= 0.74;
+    float rad = uGrainR * sz * uPack;
+    vec2 cs = normalize(R2.zw - 0.5 + 1e-4);
+    vec2 sc = vec2(rad, rad * (0.7 + 0.28 * r6));
+    float zTop = rad * (0.8 + 0.2 * r7);
+    vec2 tilt = (vec2(r4, R8.w) - 0.5) * uFacet;   // facet tilt: grains are not perfect domes
+    // ---- top grain (thin layers: sparse coverage)
+    if (!(h < 1.0 && R8.z > h)) {
+      vec2 ctr = vec2(nc) + 0.5 + (vec2(r2, r3) - 0.5) * 0.86;
+      float zb = (r1 - 0.5) * uRelief;                   // grains sit at different heights in the packing
+      if (h < 1.2) zb = 0.0;                             // resting directly on the glass
+      float d2; vec2 g;
+      float z = dome(p, ctr, cs, sc, (vec2(r6, r7) - 0.5) * uAngular, zTop, d2, g);
+      nearEdge = min(nearEdge, (length(p - ctr) - rad * 0.85));
+      if (z > -1e8) consider(Gr(zb + zTop * sqrt(sqrt(1.0 - d2)), z + zb, d2, rad, zTop, g * mix(1.0, uGrainN, smoothstep(0.8, 1.6, h)) + tilt, id, (p - ctr) / rad, k2), A, B);   // isolated grains: full roundness
+      occ = max(occ, domeH(ps1, ctr, cs, sc, zTop) + zb - rise * T1);
+      occ = max(occ, domeH(ps2, ctr, cs, sc, zTop) + zb - rise * T2);
+    }
+    // ---- bed grain below (visible through the gaps)
+    if (h > 1.15 + r3 * 0.6) {
+      uint b3 = pcg(k2);
+      vec4 RB = vec4(uvec4(b3, b3 >> 8u, b3 >> 16u, b3 >> 24u) & 255u) * (1.0 / 256.0) + (0.5 / 256.0);
+      vec2 ctr2 = vec2(nc) + 1.0 + (RB.xy - 0.5) * 0.6;
+      float rb = rad * (0.95 + 0.2 * RB.z);
+      float d2; vec2 g;
+      float z = dome(p, ctr2, cs.yx * vec2(1.0, -1.0), vec2(rb, rb * 0.85), vec2(0.0), rb * 0.8, d2, g);
+      float zb2 = -0.5 * rb - 0.5 * uRelief;
+      if (z > -1e8) consider(Gr(zb2 + rb * 0.8 * sqrt(sqrt(1.0 - d2)), z + zb2, d2, rb, rb * 0.8, g * uGrainN - tilt.yx, b3, (p - ctr2) / rb, b3 ^ k1), A, B);
     }
   }
 
-  vec3 L = normalize(uLs);
   vec3 eye = vec3(vec2(uSize) * 0.5, uEye);
   vec3 V = normalize(eye - vec3(p, hM));
+  vec3 nMacro = normalize(vec3(-hx, -hy, 1.0));
   vec3 col;
-
-  bool covered = bestZ > -1e8;
+  bool covered = A.s > -1e8;
   if (covered) {
-    uint m1 = pcg(bestId ^ 0x27d4eb2du);
-    uint m2 = pcg(m1), m3 = pcg(m2), m4 = pcg(m3), m5 = pcg(m4), m6 = pcg(m5), m7 = pcg(m6);
-    float rm = u2f(m1);
-    vec3 alb = uMinCol[5]; vec4 prop = uMinProp[5];
-    for (int k = 0; k < 6; k++) { if (rm < uMinProp[k].x) { alb = uMinCol[k]; prop = uMinProp[k]; break; } }
-    float cv = u2f(m2);
-    alb *= 0.78 + 0.44 * cv;
-    alb *= mix(vec3(0.94, 1.0, 1.08), vec3(1.06, 1.0, 0.9), u2f(m3));
-    alb *= 0.86 + 0.28 * vnoise(p * 5.5 + vec2(u2f(m4) * 91.0, cv * 57.0));
+    // anti-aliased outline: blend the front grain with the one behind over ~1.5 px
+    vec4 prop, propB; uint m5, m5B;
+    vec3 alb = grainAlbedo(A.key, A.pk, prop, m5);
+    float w = 1.0;
+    if (B.s > -1e8) {
+      w = 0.5 + 0.5 * clamp((A.s - B.s) * uCellPx / 2.2, 0.0, 1.0);
+      vec3 albB = grainAlbedo(B.key, B.pk, propB, m5B);
+      alb = mix(albB, alb, w);
+      prop = mix(propB, prop, w);
+    } else {
+      w = clamp((1.0 - sqrt(A.d2)) * A.rad * uCellPx / 1.6, 0.0, 1.0);   // outline over glass / dark gap
+      B.z = -0.6; B.g = vec2(0.0); B.top = A.top;
+    }
+    float z = mix(B.z, A.z, w);
+    vec2 gG = mix(B.g, A.g, w);
+    float top = mix(B.top, A.top, w);
+    // faint internal mottling of each grain
+    vec2 mo = vec2(float(A.key & 1023u), float((A.key >> 10u) & 1023u));
+    alb *= 1.0 + uMottle * (vnoise(p * 3.5 + mo) + 0.6 * vnoise(p * 9.0 + mo.yx) - 0.8);
 
-    vec3 n = normalize(vec3(-(hx + bestG.x), -(hy + bestG.y), 1.0));
-    vec3 nMacro = normalize(vec3(-hx, -hy, 1.0));
+    // grain-scale cast shadow from neighbouring grains toward the light (quartz passes some light)
+    float shG = mix(uGrainShMin, 1.0, smoothstep(-0.06, 0.1, z - occ));
+    // macro shadow edge resolved per grain: grain tops poke out of the shadow first
+    shM = clamp(0.5 + clr + (z - 0.15) * 1.6, 0.0, 1.0);
+    float sh = shM * mix(1.0, shG, smoothstep(0.0, 0.6, hM));
+
+    vec3 n = normalize(vec3(-(hx + gG.x), -(hy + gG.y), 1.0));
     float ndl = dot(n, L);
-    float diff = max((ndl + 0.2) / 1.2, 0.0);
-    float cav = mix(0.38, 1.0, smoothstep(0.0, 0.62, bestZ / max(bestRad * 0.9, 1e-3)));
-    float thick = smoothstep(0.0, 1.5, hM);
-    float sh = shM;
-    vec3 c0 = alb * (uLightCol * diff * sh * mix(0.8, 1.0, cav) * mix(1.0, cav, 0.6) + uSkyCol * (0.6 + 0.4 * n.z) * aoM * cav);
-    // translucency / subsurface glow of quartz-like grains
-    c0 += alb * alb * uLightCol * prop.z * 0.35 * (1.0 - bestD2) * (0.35 + 0.65 * sh) * max(dot(nMacro, L) + 0.3, 0.0);
-    // glossy specular
+    float hRel = z / max(top, 1e-3);                       // ~1 at grain tops, <0 deep in the bed
+    float cav = mix(uGapLight, 1.0, smoothstep(-1.4, 0.9, hRel));
+    vec3 key = uLightCol * max(ndl, 0.0) * sh;
+    // sky (cool, from above) + warm bounce from the surrounding sand onto grain flanks
+    float skyV = (0.55 + 0.45 * n.z) * aoM * cav;
+    vec3 bounce = uMeanCol * uLightCol * max(L.z, 0.0) * 0.35 * (1.0 - n.z) * cav * aoM;
+    vec3 c0 = alb * (key * mix(0.6, 1.0, cav) + uSkyCol * skyV + bounce);
+    // translucency: light scattered inside quartz-like grains (soft glow, also on the shadow side)
+    c0 += alb * alb * uLightCol * prop.z * 0.22 * shM * (0.35 + 0.65 * shG) * max(dot(nMacro, L), 0.0) * (1.0 - 0.6 * A.d2) * cav;
+    // glossy specular (polished quartz)
     vec3 Hh = normalize(L + V);
     float nh = max(dot(n, Hh), 0.0);
-    float a2 = pow(prop.y, 4.0);
+    float a2 = pow(prop.y * 0.8, 4.0);
     float D = a2 / (3.14159 * pow(nh * nh * (a2 - 1.0) + 1.0, 2.0));
     float F = 0.04 + 0.96 * pow(1.0 - max(dot(Hh, V), 0.0), 5.0);
-    c0 += uLightCol * D * F * max(ndl, 0.0) * sh * 0.22 * cav;
-    // sparkle (mica flakes, glassy facets)
-    if (u2f(m5) < prop.w && bestD2 < 0.65) {
-      vec3 nf = normalize(n + (vec3(u2f(m6), u2f(m7), u2f(pcg(m7))) - 0.5) * vec3(1.3, 1.3, 0.5));
-      float g = max(dot(reflect(-L, nf), V), 0.0);
-      c0 += uLightCol * pow(g, 700.0) * 60.0 * sh;
+    c0 += uLightCol * D * F * max(ndl, 0.0) * sh * 0.12 * uSpec * w;
+    // sparkle: a small flat facet (mica flake, cleavage plane of quartz/glass) on some grains mirrors the light when the
+    // tilt brings it into alignment -> pinpoint glints that twinkle as the phone moves
+    if (u2f(m5) < prop.w * 2.0 && w > 0.9) {
+      uint m6 = pcg(m5), m7 = pcg(m6), m8 = pcg(m7);
+      vec2 fcn = (vec2(u2f(m7), u2f(m8)) - 0.5) * 0.9;
+      float fm = 1.0 - smoothstep(0.12, 0.26, length(A.q - fcn));
+      if (fm > 0.0) {
+        vec3 nf = normalize(nMacro + vec3((vec2(u2f(m6), u2f(pcg(m8))) - 0.5) * 1.2, 0.0));
+        float g = max(dot(reflect(-L, nf), V), 0.0);
+        c0 += uLightCol * pow(g, 45.0) * 6.0 * sh * fm;
+      }
     }
-    col = c0;
+    // motion blur of grain detail in fast flow (grains moving > ~1 grain per frame)
+    float mb = clamp((spd - 25.0) / 160.0, 0.0, 0.7);
+    vec3 cBlur = uMeanCol * (uLightCol * max(dot(nMacro, L), 0.0) * shM * 0.72 + uSkyCol * aoM * 0.7);
+    col = mix(c0, cBlur, mb);
   } else {
-    // ---- bare glass (black screen) or deep crevice
+    // ---- bare glass (black screen) under thin layers, or deep crevice in the bed
+    float shG = smoothstep(-0.06, 0.1, -0.05 - occ);
     vec3 R = reflect(-V, vec3(0.0, 0.0, 1.0));
     float fres = 0.04 + 0.96 * pow(1.0 - max(V.z, 0.0), 5.0);
-    float ceiling = pow(max(dot(R, normalize(uUp)), 0.0), 3.0);
-    float blob = exp(-pow(length(R - L) / 0.32, 2.0));
-    vec3 env = uSkyCol * (0.25 + 1.4 * ceiling) + uLightCol * 3.0 * blob;
-    vec3 glass = vec3(0.0025, 0.0027, 0.0032) + env * fres;
+    float ceiling = pow(max(dot(R, normalize(uUp)), 0.0), 2.0);
+    float lamp = exp(-pow(length(R - L) / 0.45, 2.0));
+    // faint oily smudges on the glass (fixed to the device, so a static pattern is physically right)
+    float smudge = vnoise(p * 0.07 + 13.0) * 0.6 + vnoise(p * 0.19 + 71.0) * 0.4;
+    smudge = smoothstep(0.35, 0.9, smudge);
+    vec3 env = uSkyCol * (0.16 + 0.55 * ceiling) * (0.8 + 0.6 * smudge) + uLightCol * (0.5 + 1.2 * smudge) * lamp;
+    vec3 glass = vec3(0.0012, 0.0013, 0.0016) + env * fres;
+    // sand dust left on the glass: faint haze + sparse tiny lit specks (two sizes)
     float dust = texelFetch(uAux, clamp(ivec2(p), ivec2(0), uSize - 1), 0).g;
-    float hs = hash2(floor(gl_FragCoord.xy / 1.25));
-    float speck = step(1.0 - dust * 0.05, hs);
-    glass += uMeanCol * (uLightCol * max(L.z, 0.0) * 0.5 * speck + 0.012 * dust * uSkyCol);
-    // contact shadow around grains lying on the glass
-    glass *= 1.0 - 0.75 * exp(-max(nearEdge, 0.0) * 3.0);
-    vec3 crevice = uMeanCol * (uSkyCol * 0.2 + uLightCol * 0.05) * aoM * shM;
-    col = mix(glass, crevice, smoothstep(0.6, 1.6, hM));
+    vec2 fc = gl_FragCoord.xy;
+    float s1 = step(1.0 - dust * 0.010, hash2(floor(fc / 1.5))) * (0.3 + 0.7 * hash2(floor(fc / 1.5) + 31.0));
+    float s2 = step(1.0 - dust * 0.0025, hash2(floor(fc / 2.6) + 57.0)) * (0.5 + 0.5 * hash2(floor(fc / 2.6) + 9.0));
+    float speck = max(s1 * 0.6, s2);
+    glass += uMeanCol * (uLightCol * max(L.z, 0.0) * 0.35 * speck * shG + 0.015 * dust * (1.0 + smudge) * (uSkyCol + uLightCol * 0.3 * shG));
+    // contact shadow around grains lying on the glass + their cast shadow
+    glass *= (1.0 - 0.7 * exp(-max(nearEdge, 0.0) * 4.0)) * mix(0.35, 1.0, shG);
+    // deep gap between grains: lit by light scattered through the surrounding grains
+    vec3 crevice = uMeanCol * (uSkyCol * 0.3 + uLightCol * max(L.z, 0.0) * 0.16 * shM) * aoM;
+    col = mix(glass, crevice, smoothstep(0.5, 1.5, hM));
   }
+  if (uDebug == 1) col = uMeanCol * (uLightCol * max(dot(nMacro, L), 0.0) * shM + uSkyCol * (0.55 + 0.45 * nMacro.z) * aoM);
+  if (uDebug == 2) col = vec3(shM, aoM, 0.5 + 0.5 * nMacro.x);
   col *= uExposure;
-  col = aces(col);
+  // hue-preserving filmic: tonemap luminance, keep some per-channel roll-off for natural highlight desaturation
+  float Y = dot(col, vec3(0.2126, 0.7152, 0.0722));
+  vec3 cY = col * (aces(vec3(Y)).x / max(Y, 1e-5));
+  col = clamp(mix(cY, aces(col), uDesat), 0.0, 1.0);
   col = pow(col, vec3(1.0 / 2.2));
   col += (hash2(gl_FragCoord.xy + 17.0) - 0.5) / 255.0;
   frag = vec4(col, 1.0);
@@ -600,8 +952,8 @@ class SandEngine {
     gl.enableVertexAttribArray(0);
     gl.vertexAttribPointer(0, 2, gl.FLOAT, false, 0, 0);
     this.progs = {
-      vel: this._prog(FS_VELOCITY), adv: this._prog(FS_ADVECT), contact: this._prog(FS_CONTACT),
-      red0: this._prog(FS_REDUCE0), red: this._prog(FS_REDUCE), surf: this._prog(FS_SURF), render: this._prog(FS_RENDER)
+      vel: this._prog(FS_VELOCITY), adv: this._prog(FS_ADVECT), contact: this._prog(FS_CONTACT), contact2: this._prog(FS_CONTACT2), redAll: this._prog(FS_REDUCE_ALL),
+      red0: this._prog(FS_REDUCE0), red: this._prog(FS_REDUCE), surf: this._prog(FS_SURF), render: this._prog(FS_RENDER), rough: this._prog(FS_ROUGH)
     };
   }
 
@@ -668,7 +1020,7 @@ class SandEngine {
     this.aux = [this._tex(w, h, F.i, F.t, gl.NEAREST, ax), this._tex(w, h, F.i, F.t, gl.NEAREST, null)];
     this.cur = 0; this.auxCur = 0;
     this.fState = [this._fbo(this.state[0]), this._fbo(this.state[1])];
-    this.fContact = [this._fbo(this.state[1], this.aux[1]), this._fbo(this.state[0], this.aux[0])];
+    this.fAux = [this._fbo(this.aux[0]), this._fbo(this.aux[1])];
     this.surf = this._tex(w, h, gl.RGBA16F, gl.HALF_FLOAT, gl.LINEAR, null);
     this.fSurf = this._fbo(this.surf);
     // reduction chain
@@ -679,6 +1031,8 @@ class SandEngine {
       const t = this._tex(rw, rh, F.i, F.t, gl.NEAREST, null);
       this.red.push({ t, f: this._fbo(t), w: rw, h: rh });
     } while (rw * rh > 64);
+    this.sumTex = this._tex(1, 1, F.i, F.t, gl.NEAREST, null);
+    this.fSum = this._fbo(this.sumTex);
     const last = this.red[this.red.length - 1];
     this.readBuf = new Float32Array(last.w * last.h * 4);
     this.pbos = [gl.createBuffer(), gl.createBuffer(), gl.createBuffer()];
@@ -689,6 +1043,7 @@ class SandEngine {
     });
     gl.bindBuffer(gl.PIXEL_PACK_BUFFER, null);
     this._pending = [];
+    this.quiet = 0; this.gRest = null; this.idle = false;
     let m = 0; for (let i = 0; i < initState.length; i += 4) m += initState[i];
     this.targetMass = m; this.stats.mass = m; this.stats.valid = false;
   }
@@ -696,8 +1051,8 @@ class SandEngine {
   _freeSim() {
     const gl = this.gl;
     if (!this.state) return;
-    [...this.state, ...this.aux, this.surf].forEach(t => gl.deleteTexture(t));
-    [...this.fState, ...this.fContact, this.fSurf].forEach(f => gl.deleteFramebuffer(f));
+    [...this.state, ...this.aux, this.surf, this.sumTex].forEach(t => gl.deleteTexture(t));
+    [...this.fState, ...this.fAux, this.fSurf, this.fSum].forEach(f => gl.deleteFramebuffer(f));
     this.red.forEach(r => { gl.deleteTexture(r.t); gl.deleteFramebuffer(r.f); });
     this.pbos.forEach(b => gl.deleteBuffer(b));
     this._pending.forEach(p => gl.deleteSync(p.sync));
@@ -720,28 +1075,72 @@ class SandEngine {
   // One frame of simulation. P: physics params, contacts: {segs:[[x0,y0,x1,y1,r],...], pour:[x,y,r,amount]}
   simulate(frameDt, P, contacts) {
     const gl = this.gl;
+    // ---- idle: when everything has come to rest (exactly zero velocities, read back asynchronously), nothing
+    // touches the sand and gravity has not changed, skip the whole simulation (battery + headroom for rendering).
+    const g = P.g, gm = Math.hypot(g[0], g[1], g[2]) || 1;
+    const wake = contacts.segs.length > 0 || (contacts.pour && contacts.pour[3] > 0) || P.fluid > 0.003 || P.kick > 0 ||
+      !this.gRest || Math.hypot(g[0] - this.gRest[0], g[1] - this.gRest[1], g[2] - this.gRest[2]) > 0.006 * gm;
+    if (wake) { this.quiet = 0; this.gRest = g.slice(); }
+    this.idle = !wake && this.quiet >= 4;
+    if (this.idle) { this._poll(); return; }
     gl.bindVertexArray(this.vao);
     gl.viewport(0, 0, this.W, this.H);
     gl.disable(gl.BLEND);
 
-    // ---- contact / pour / mass correction pass
+    // ---- contact pass (aux: footprint mask, removed mass, unnormalised rim deposit)
+    const segs = contacts.segs.slice(0, 16);
     {
       const pr = this.progs.contact;
       gl.useProgram(pr.p);
-      gl.bindFramebuffer(gl.FRAMEBUFFER, this.fContact[this.cur]);
+      gl.bindFramebuffer(gl.FRAMEBUFFER, this.fAux[this.cur ^ 1]);
       this._bindTex(0, this.state[this.cur], pr.u.uState);
       this._bindTex(1, this.aux[this.cur], pr.u.uAux);
       this._simUniforms(pr, 0);
-      const segs = contacts.segs.slice(0, 16);
-      const a = new Float32Array(64), r = new Float32Array(16);
-      segs.forEach((s, i) => { a.set([s[0], s[1], s[2], s[3]], i * 4); r[i] = s[4]; });
+      const a = new Float32Array(64), r = new Float32Array(16), cut = new Float32Array(16);
+      segs.forEach((s, i) => { a.set([s[0], s[1], s[2], s[3]], i * 4); r[i] = s[4]; cut[i] = s.length > 5 ? s[5] : 1e4; });
       gl.uniform4fv(pr.u.uSeg, a);
       gl.uniform1fv(pr.u.uSegR, r);
+      gl.uniform1fv(pr.u.uSegCut, cut);
       gl.uniform1i(pr.u.uNSeg, segs.length);
+      gl.uniform1f(pr.u.uMassCorr, this.massCorr);
+      gl.uniform1f(pr.u.uFrameDt, frameDt);
+      gl.drawArrays(gl.TRIANGLES, 0, 3);
+    }
+    // ---- GPU sum of removed / deposited mass (only when something touches the sand)
+    if (segs.length) {
+      let src = this.aux[this.cur ^ 1], sw = this.W, sh = this.H;
+      const pr = this.progs.red;
+      gl.useProgram(pr.p);
+      for (let i = 0; i < this.red.length; i++) {
+        const r = this.red[i];
+        gl.bindFramebuffer(gl.FRAMEBUFFER, r.f);
+        gl.viewport(0, 0, r.w, r.h);
+        this._bindTex(0, src, pr.u.uSrc);
+        gl.uniform2i(pr.u.uSrcSize, sw, sh);
+        gl.drawArrays(gl.TRIANGLES, 0, 3);
+        src = r.t; sw = r.w; sh = r.h;
+      }
+      const pa = this.progs.redAll;
+      gl.useProgram(pa.p);
+      gl.bindFramebuffer(gl.FRAMEBUFFER, this.fSum);
+      gl.viewport(0, 0, 1, 1);
+      this._bindTex(0, src, pa.u.uSrc);
+      gl.uniform2i(pa.u.uSrcSize, sw, sh);
+      gl.drawArrays(gl.TRIANGLES, 0, 3);
+      gl.viewport(0, 0, this.W, this.H);
+    }
+    // ---- apply removal + normalised deposit, pour, global mass correction
+    {
+      const pr = this.progs.contact2;
+      gl.useProgram(pr.p);
+      gl.bindFramebuffer(gl.FRAMEBUFFER, this.fState[this.cur ^ 1]);
+      this._bindTex(0, this.state[this.cur], pr.u.uState);
+      this._bindTex(1, this.aux[this.cur ^ 1], pr.u.uAux);
+      this._bindTex(2, this.sumTex, pr.u.uSum);
+      this._simUniforms(pr, 0);
       const po = contacts.pour || [0, 0, 1, 0];
       gl.uniform4f(pr.u.uPour, po[0], po[1], po[2], po[3]);
       gl.uniform1f(pr.u.uMassCorr, this.massCorr);
-      gl.uniform1f(pr.u.uFrameDt, frameDt);
       gl.drawArrays(gl.TRIANGLES, 0, 3);
       this.cur ^= 1;
       this.massCorr = 1;
@@ -764,10 +1163,15 @@ class SandEngine {
       gl.uniform1f(pv.u.uVmax, vmax);
       gl.uniform1f(pv.u.uVisc, P.visc);
       gl.uniform1f(pv.u.uFluid, P.fluid);
-      gl.uniform1f(pv.u.uHmax, P.hmax);
+      gl.uniform1f(pv.u.uHmaxM, P.hmax);
       gl.uniform1f(pv.u.uLid, P.lid);
       gl.uniform1f(pv.u.uKick, P.kick);
-      gl.uniform2f(pv.u.uRate, P.rate, P.rateV);
+      gl.uniform2f(pv.u.uMob, P.rollLayer, P.mobile ? 1 : 0);
+      gl.uniform1f(pv.u.uMobE, P.mobE);
+      gl.uniform2f(pv.u.uBag, P.bagV0, P.bagCap);
+      gl.uniform1f(pv.u.uExtrap, P.extrap);
+      gl.uniform2f(pv.u.uStop, P.hIMin, P.vStop);
+      gl.uniform4f(pv.u.uRate, P.rate, P.rateI0, P.pgMax, P.advect ? 1 : 0);
       gl.drawArrays(gl.TRIANGLES, 0, 3);
       this.cur ^= 1;
 
@@ -775,6 +1179,14 @@ class SandEngine {
       gl.bindFramebuffer(gl.FRAMEBUFFER, this.fState[this.cur ^ 1]);
       this._bindTex(0, this.state[this.cur], pa.u.uState);
       this._simUniforms(pa, dt);
+      gl.uniform3f(pa.u.uG, P.g[0], P.g[1], P.g[2]);
+      gl.uniform4f(pa.u.uMu, P.muThin, P.muThick, P.kinetic, P.K);
+      gl.uniform1f(pa.u.uFluid, P.fluid);
+      gl.uniform2f(pa.u.uMob, P.rollLayer, P.mobile ? 1 : 0);
+      gl.uniform1f(pa.u.uHmaxM, P.hmax);
+      gl.uniform1f(pa.u.uMobE, P.mobE);
+      gl.uniform1f(pa.u.uSeedMix, P.seedMix);
+      gl.uniform2f(pa.u.uBag, P.bagV0, P.bagCap);
       gl.drawArrays(gl.TRIANGLES, 0, 3);
       this.cur ^= 1;
       this.frame++;
@@ -784,7 +1196,14 @@ class SandEngine {
 
   _reduceAndRead() {
     const gl = this.gl;
-    // poll pending reads
+    this._poll();
+    if (this._pending.length >= 3) return;
+    this._reduce();
+  }
+
+  // poll pending async stats reads
+  _poll() {
+    const gl = this.gl;
     while (this._pending.length) {
       const p = this._pending[0];
       const st = gl.clientWaitSync(p.sync, 0, 0);
@@ -802,8 +1221,14 @@ class SandEngine {
         const c = this.targetMass / m;
         this.massCorr = Math.min(1.002, Math.max(0.998, c));
       }
+      // rest detection for idling: static sand has exactly zero face velocities
+      if (a < 0.5 && mv === 0 && Math.abs(m - this.targetMass) < 1e-4 * this.targetMass + 1) this.quiet = (this.quiet || 0) + 1;
+      else this.quiet = 0;
     }
-    if (this._pending.length >= 3) return;
+  }
+
+  _reduce() {
+    const gl = this.gl;
     // reduction passes
     let src = this.state[this.cur], sw = this.W, sh = this.H;
     for (let i = 0; i < this.red.length; i++) {
@@ -836,15 +1261,39 @@ class SandEngine {
   render(R) {
     const gl = this.gl;
     gl.bindVertexArray(this.vao);
+    // render-only sim-res textures (gradient); (re)created when the sim grid changes
+    if (this._surfFor !== this.surf) {
+      if (this._surf2) { gl.deleteTexture(this._surf2); gl.deleteFramebuffer(this._fSurfMRT); }
+      this._surf2 = this._tex(this.W, this.H, gl.RGBA16F, gl.HALF_FLOAT, gl.LINEAR, null);
+      this._fSurfMRT = this._fbo(this.surf, this._surf2);
+      if (this._rough) { gl.deleteTexture(this._rough); gl.deleteFramebuffer(this._fRough); }
+      this._rough = this._tex(this.W, this.H, gl.RGBA16F, gl.HALF_FLOAT, gl.NEAREST, null);
+      this._fRough = this._fbo(this._rough);
+      this._surfFor = this.surf;
+    }
+    // micro-relief of the grain packing at sim res
+    {
+      const pr = this.progs.rough;
+      gl.useProgram(pr.p);
+      gl.bindFramebuffer(gl.FRAMEBUFFER, this._fRough);
+      gl.viewport(0, 0, this.W, this.H);
+      this._bindTex(0, this.state[this.cur], pr.u.uState);
+      this._simUniforms(pr, 0);
+      gl.uniform1f(pr.u.uRoughAmp, (R.vis && R.vis.rough != null) ? R.vis.rough : (R.rough != null ? R.rough : 2.5));
+      gl.drawArrays(gl.TRIANGLES, 0, 3);
+    }
     // surf prep at sim res
     {
       const pr = this.progs.surf;
       gl.useProgram(pr.p);
-      gl.bindFramebuffer(gl.FRAMEBUFFER, this.fSurf);
+      gl.bindFramebuffer(gl.FRAMEBUFFER, this._fSurfMRT);
       gl.viewport(0, 0, this.W, this.H);
       this._bindTex(0, this.state[this.cur], pr.u.uState);
+      this._bindTex(1, this._rough, pr.u.uRoughT);
       this._simUniforms(pr, 0);
       gl.uniform3f(pr.u.uLs, R.L[0], R.L[1], R.L[2]);
+      const VA = (R.vis && R.vis.ao) || [0.2, 0.06];
+      gl.uniform2f(pr.u.uAO, VA[0], VA[1]);
       gl.drawArrays(gl.TRIANGLES, 0, 3);
     }
     {
@@ -855,6 +1304,21 @@ class SandEngine {
       this._bindTex(0, this.state[this.cur], pr.u.uState);
       this._bindTex(1, this.surf, pr.u.uSurf);
       this._bindTex(2, this.aux[this.cur], pr.u.uAux);
+      this._bindTex(3, this._surf2, pr.u.uSurf2);
+      gl.uniform1f(pr.u.uAlbVar, (R.vis && R.vis.albVar != null) ? R.vis.albVar : (R.albVar != null ? R.albVar : 0.12));
+      gl.uniform1f(pr.u.uRelief, R.relief != null ? R.relief : 0.35);
+      const V = R.vis || {};
+      gl.uniform1f(pr.u.uPack, V.pack != null ? V.pack : 0.56);
+      gl.uniform1f(pr.u.uGrainN, V.grainN != null ? V.grainN : 0.45);
+      gl.uniform1f(pr.u.uFacet, V.facet != null ? V.facet : 0.45);
+      gl.uniform1f(pr.u.uGapLight, V.gapLight != null ? V.gapLight : 0.6);
+      gl.uniform1f(pr.u.uMicroN, V.microN != null ? V.microN : 0.6);
+      gl.uniform1i(pr.u.uDebug, V.debug | 0);
+      gl.uniform1f(pr.u.uMottle, V.mottle != null ? V.mottle : 0.12);
+      gl.uniform1f(pr.u.uAngular, V.angular != null ? V.angular : 0.26);
+      gl.uniform1f(pr.u.uSpec, V.spec != null ? V.spec : 1.0);
+      gl.uniform1f(pr.u.uDesat, V.desat != null ? V.desat : 0.4);
+      gl.uniform1f(pr.u.uGrainShMin, V.grainSh != null ? V.grainSh : 0.5);
       gl.uniform2i(pr.u.uSize, this.W, this.H);
       gl.uniform2f(pr.u.uRes, this.canvas.width, this.canvas.height);
       gl.uniform1f(pr.u.uCellPx, R.cellPx);
@@ -862,7 +1326,7 @@ class SandEngine {
       gl.uniform3f(pr.u.uUp, R.up[0], R.up[1], R.up[2]);
       gl.uniform3fv(pr.u.uLightCol, R.lightCol);
       gl.uniform3fv(pr.u.uSkyCol, R.skyCol);
-      gl.uniform1f(pr.u.uExposure, R.exposure);
+      gl.uniform1f(pr.u.uExposure, R.exposure * (R.vis && R.vis.exp != null ? R.vis.exp : 1));
       gl.uniform1f(pr.u.uGrainR, R.grainR);
       gl.uniform1f(pr.u.uEye, R.eye);
       gl.uniform3fv(pr.u.uMinCol, R.minCol);
@@ -872,13 +1336,30 @@ class SandEngine {
     }
   }
 
-  // Synchronous full readback (used for resizing / debugging only)
+  // Synchronous full readback (used for resizing / snapshots / debugging only). Returns null on failure.
   readState() {
     const gl = this.gl;
+    if (!this.state || gl.isContextLost()) return null;
     gl.bindFramebuffer(gl.FRAMEBUFFER, this.fState[this.cur]);
     const out = new Float32Array(this.W * this.H * 4);
+    while (gl.getError() !== gl.NO_ERROR) { /* clear stale errors */ }
     gl.readPixels(0, 0, this.W, this.H, gl.RGBA, gl.FLOAT, out);
+    if (gl.getError() !== gl.NO_ERROR) return null;
     return out;
+  }
+
+  get lost() { return this.gl.isContextLost(); }
+
+  // Re-create every GL object after a WebGL context loss+restore. Old handles are dead, so just drop them;
+  // the caller must re-upload the simulation with setup().
+  restoreContext() {
+    const gl = this.gl;
+    this.state = null; this._pending = []; this.massCorr = 1;
+    this.floatRT = !!gl.getExtension('EXT_color_buffer_float');
+    gl.getExtension('EXT_color_buffer_half_float');
+    gl.getExtension('EXT_float_blend');
+    this.stateFmt = this.floatRT ? { i: gl.RGBA32F, t: gl.FLOAT } : { i: gl.RGBA16F, t: gl.HALF_FLOAT };
+    this._initGL();
   }
 }
 
@@ -903,63 +1384,68 @@ function toHalf(f32) {
 const PRESETS = {
   beach: {
     name: 'Golden beach', swatch: ['#e3cfa4', '#c9a46a'],
-    grain: 1.0, muThin: 0.24, muThick: 0.44,
+    grain: 1.0, muThin: 0.24, muThick: 0.44, albVar: 0.05, relief: 0.35, rough: 4.0, exposure: 0.46,
+    vis: {},
     minerals: [
-      // [hex, probability, roughness, translucency, sparkle]
-      ['#dcc8a0', 0.46, 0.38, 0.9, 0.035],   // clear/beige quartz
-      ['#c7a36d', 0.20, 0.42, 0.7, 0.02],    // amber quartz
-      ['#cf8f62', 0.09, 0.55, 0.3, 0.0],     // feldspar (orange/pink)
-      ['#efe9dc', 0.11, 0.5, 0.5, 0.01],     // shell fragments
-      ['#6b5a46', 0.09, 0.6, 0.1, 0.0],      // lithic fragments
-      ['#23201d', 0.05, 0.3, 0.0, 0.25]      // magnetite / mica (sparkly)
+      // [hex albedo, probability, roughness, translucency, sparkle]
+      ['#cfae7c', 0.50, 0.35, 0.8, 0.02],    // honey quartz
+      ['#d8c29c', 0.20, 0.32, 0.9, 0.035],   // pale quartz
+      ['#c99a6e', 0.12, 0.55, 0.3, 0.0],     // feldspar (orange/pink)
+      ['#dccdb0', 0.06, 0.5, 0.4, 0.0],      // shell fragments
+      ['#a58a68', 0.10, 0.6, 0.1, 0.0],      // lithic fragments
+      ['#5a4a3a', 0.02, 0.35, 0.0, 0.3]      // dark heavy minerals / biotite
     ]
   },
   coral: {
     name: 'White coral', swatch: ['#f4f0e8', '#e6d9c4'],
-    grain: 1.05, muThin: 0.24, muThick: 0.46,
+    grain: 1.05, muThin: 0.24, muThick: 0.46, albVar: 0.06, relief: 0.4, rough: 4.0, exposure: 0.46,
+    vis: { angular: 0.42, facet: 0.55, grainN: 0.5, spec: 0.7 },
     minerals: [
-      ['#f3efe7', 0.50, 0.5, 0.6, 0.01],
-      ['#e7dcc7', 0.25, 0.5, 0.5, 0.01],
-      ['#ebc9bc', 0.10, 0.55, 0.4, 0.0],
-      ['#fbfaf6', 0.07, 0.35, 0.8, 0.05],
-      ['#a9a296', 0.06, 0.6, 0.1, 0.0],
-      ['#4a443d', 0.02, 0.5, 0.0, 0.0]
+      ['#f0e9dc', 0.46, 0.5, 0.7, 0.0],      // coral / aragonite fragments
+      ['#e9dcc4', 0.24, 0.5, 0.6, 0.0],      // weathered shell, cream
+      ['#ecc8bc', 0.10, 0.55, 0.5, 0.0],     // pink foraminifera
+      ['#f7f5ef', 0.10, 0.3, 0.8, 0.06],     // polished white shell (glints)
+      ['#bdb3a2', 0.08, 0.6, 0.2, 0.0],      // grey-tan fragments
+      ['#7d746a', 0.02, 0.5, 0.0, 0.0]       // rare dark grains
     ]
   },
   volcanic: {
     name: 'Black volcanic', swatch: ['#2a2a2c', '#4a4744'],
-    grain: 1.0, muThin: 0.26, muThick: 0.47,
+    grain: 1.0, muThin: 0.26, muThick: 0.47, albVar: 0.15, relief: 0.35, rough: 4.0, exposure: 0.82,
+    vis: { angular: 0.36, facet: 0.5, grainN: 0.5, spec: 2.6, gapLight: 0.5 },
     minerals: [
-      ['#1f1f21', 0.48, 0.42, 0.0, 0.03],
-      ['#3b3936', 0.25, 0.55, 0.0, 0.0],
-      ['#55603a', 0.08, 0.35, 0.4, 0.04],     // olivine
-      ['#121215', 0.12, 0.18, 0.0, 0.35],     // volcanic glass
-      ['#6e6a64', 0.05, 0.6, 0.0, 0.0],
-      ['#cfc8bc', 0.02, 0.5, 0.4, 0.0]
+      ['#2e2d2c', 0.46, 0.3, 0.0, 0.02],     // basalt
+      ['#423f3b', 0.24, 0.45, 0.0, 0.0],     // weathered basalt, brownish grey
+      ['#1c1c1e', 0.20, 0.12, 0.0, 0.12],    // volcanic glass (glossy)
+      ['#474a3a', 0.03, 0.2, 0.3, 0.08],     // olivine
+      ['#5e5953', 0.05, 0.5, 0.0, 0.0],      // grey lithics
+      ['#b9b2a6', 0.01, 0.4, 0.4, 0.0]       // pale feldspar specks
     ]
   },
   desert: {
     name: 'Red desert', swatch: ['#d07a45', '#a84e2c'],
-    grain: 0.85, muThin: 0.23, muThick: 0.43,
+    grain: 0.85, muThin: 0.23, muThick: 0.43, albVar: 0.08, relief: 0.3, rough: 3.5, exposure: 0.57,
+    vis: { angular: 0.16, facet: 0.35, grainN: 0.5, spec: 0.25 },
     minerals: [
-      ['#c46c3c', 0.42, 0.55, 0.35, 0.01],
-      ['#d98d52', 0.28, 0.5, 0.4, 0.01],
-      ['#94432a', 0.15, 0.6, 0.2, 0.0],
-      ['#e5bc8e', 0.10, 0.45, 0.6, 0.03],
-      ['#5a3324', 0.04, 0.6, 0.0, 0.0],
-      ['#2a1f1a', 0.01, 0.4, 0.0, 0.1]
+      ['#bd8460', 0.48, 0.7, 0.35, 0.0],     // iron-stained, frosted quartz
+      ['#c99872', 0.24, 0.7, 0.4, 0.0],      // paler orange
+      ['#a66a4f', 0.14, 0.75, 0.25, 0.0],    // deep red
+      ['#ddb088', 0.07, 0.6, 0.6, 0.01],     // bleached quartz
+      ['#7a5040', 0.06, 0.7, 0.0, 0.0],      // dark lithics
+      ['#3a2a22', 0.01, 0.4, 0.0, 0.0]       // heavy minerals
     ]
   },
   zen: {
     name: 'Zen granite', swatch: ['#bdb8ae', '#8f8a82'],
-    grain: 1.15, muThin: 0.27, muThick: 0.5,
+    grain: 1.15, muThin: 0.27, muThick: 0.5, albVar: 0.08, relief: 0.4, rough: 4.0, exposure: 0.48,
+    vis: { angular: 0.48, facet: 0.6, grainN: 0.45, spec: 0.8 },
     minerals: [
-      ['#bfbab0', 0.42, 0.55, 0.3, 0.01],
-      ['#8f8a82', 0.28, 0.6, 0.1, 0.0],
-      ['#e9e6e0', 0.13, 0.45, 0.6, 0.03],
-      ['#2c2b29', 0.10, 0.35, 0.0, 0.12],
-      ['#b99c8c', 0.05, 0.55, 0.2, 0.0],
-      ['#6d6a64', 0.02, 0.6, 0.0, 0.0]
+      ['#c4bfb5', 0.36, 0.5, 0.3, 0.0],      // feldspar, off-white grey
+      ['#9c978f', 0.26, 0.55, 0.1, 0.0],     // grey granite fragments
+      ['#e3dfd7', 0.16, 0.35, 0.6, 0.03],    // quartz, white
+      ['#34322f', 0.10, 0.3, 0.0, 0.25],     // biotite / hornblende (dark, flaky glints)
+      ['#c0a798', 0.08, 0.55, 0.2, 0.0],     // pinkish feldspar
+      ['#6f6b65', 0.04, 0.6, 0.0, 0.0]       // dark grey
     ]
   }
 };
@@ -987,75 +1473,213 @@ function presetUniforms(pr) {
 
 // ---- 50_audio.js
 // ============================================================================
-// AUDIO: procedural granular sound (flowing hiss + finger scrape)
+// AUDIO: procedural granular sand sound
+//   flow   - fine granular hiss: a Poisson stream of tiny grain "ticks" (short
+//            damped resonances, 2-9 kHz). Sparse = trickle, dense = hiss.
+//   scrape - finger plowing: lower, rougher stick-slip ticks + a crackly noise bed
+//   rumble - mass of sand sliding: low-passed noise
+//   thump  - impacts (sand slapping a wall after a tilt/shake): pitched-down sine
+//            body + soft noise burst + a brief spray of ticks
+// The DSP is one plain class (SandDSP) that runs inside an AudioWorklet (its
+// source is shipped through a Blob URL) or, if worklets are unavailable, in a
+// ScriptProcessorNode on the main thread.
 // ============================================================================
-class SandAudio {
-  constructor() { this.ctx = null; this.enabled = true; this.flow = 0; this.scrape = 0; }
+class SandDSP {
+  constructor(sr) {
+    this.sr = sr;
+    this.seed = 0x2545f491;
+    this.tgt = { flow: 0, scrape: 0, rumble: 0, bright: 0.5 };
+    this.flow = 0; this.scrape = 0; this.rumble = 0; this.bright = 0.5;
+    this.kPar = 1 - Math.exp(-128 / (sr * 0.035));            // per-block parameter smoothing
+    // resonator banks: 4 resonators x 2 channels each; per resonator [a1, a2, gain, y1, y2, in]
+    this.fb = this._bank([2300, 3500, 5200, 7600], 0.0011);
+    this.sb = this._bank([700, 1250, 2100, 3400], 0.0019);
+    this.fFreq = [2300, 3500, 5200, 7600]; this.sFreq = [700, 1250, 2100, 3400];
+    this.lastBright = -1;
+    // noise filters
+    this.r1 = 0; this.r2 = 0; this.kR = 1 - Math.exp(-2 * Math.PI * 140 / sr);
+    this.n1 = 0; this.n2 = 0; this.kNh = 1 - Math.exp(-2 * Math.PI * 700 / sr); this.kNl = 1 - Math.exp(-2 * Math.PI * 3800 / sr);
+    this.rough = 0; this.kRough = 1 - Math.exp(-2 * Math.PI * 30 / sr);
+    // thump
+    this.thAmp = 0; this.thEnv = 0; this.thAtk = 1; this.thPh = 0; this.thF = 62; this.thN = 0; this.thNz = 0;
+    this.dTh = Math.exp(-1 / (sr * 0.085)); this.dThN = Math.exp(-1 / (sr * 0.045));
+    this.spray = 0; this.dSpray = Math.exp(-128 / (sr * 0.12));
+  }
+  _bank(freqs, tau) {
+    const b = [];
+    for (let ch = 0; ch < 2; ch++) for (let k = 0; k < freqs.length; k++) b.push(new Float64Array(6));
+    this._tune(b, freqs, tau, 1);
+    b.tau = tau;
+    return b;
+  }
+  _tune(b, freqs, tau, mul) {
+    const n = freqs.length;
+    for (let ch = 0; ch < 2; ch++) for (let k = 0; k < n; k++) {
+      const f = Math.min(this.sr * 0.42, freqs[k] * mul * (ch ? 1.035 : 0.97));
+      const w = 2 * Math.PI * f / this.sr, r = Math.exp(-1 / (this.sr * tau));
+      const o = b[ch * n + k];
+      o[0] = 2 * r * Math.cos(w); o[1] = -r * r; o[2] = Math.sin(w);
+    }
+  }
+  rnd() { let x = this.seed; x ^= x << 13; x ^= x >>> 17; x ^= x << 5; this.seed = x >>> 0; return this.seed / 4294967296; }
+  set(p) { Object.assign(this.tgt, p); }
+  thump(a) {
+    a = Math.min(1, Math.max(0, a));
+    if (a < 0.02) return;
+    this.thAmp = Math.max(this.thAmp * this.thEnv, a); this.thEnv = 1; this.thAtk = 0; this.thN = 1;
+    this.thF = 52 + this.rnd() * 22;
+    this.spray = Math.max(this.spray, a);
+  }
+  _hit(b, a) {
+    const k = (this.rnd() * 4) | 0, pan = this.rnd();
+    b[k][5] += a * Math.sqrt(1 - pan) * b[k][2];
+    b[4 + k][5] += a * Math.sqrt(pan) * b[4 + k][2];
+  }
+  // fills L and R (Float32Array) with n samples
+  process(L, R, n) {
+    const t = this.tgt, kp = this.kPar;
+    this.flow += (t.flow - this.flow) * kp; this.scrape += (t.scrape - this.scrape) * kp;
+    this.rumble += (t.rumble - this.rumble) * kp; this.bright += (t.bright - this.bright) * kp;
+    if (Math.abs(this.bright - this.lastBright) > 0.01) {
+      this._tune(this.fb, this.fFreq, this.fb.tau, 0.8 + 0.45 * this.bright);
+      this._tune(this.sb, this.sFreq, this.sb.tau, 0.85 + 0.3 * this.bright);
+      this.lastBright = this.bright;
+    }
+    this.spray *= this.dSpray;
+    const sr = this.sr, fl = this.flow, sc = this.scrape, ru = this.rumble;
+    // event rates (per sample)
+    const fRate = (fl > 0.002 ? 60 * fl + 16000 * Math.pow(fl, 1.7) : 0) + this.spray * 9000;
+    const sRate = sc > 0.002 ? 150 * sc + 4200 * Math.pow(sc, 1.3) : 0;
+    const pF = Math.min(0.9, fRate / sr), pS = Math.min(0.9, sRate / sr);
+    // tick amplitude: dense streams get quieter ticks so loudness grows ~ sqrt(rate)
+    const aF = 0.3 * (0.18 + 0.82 * Math.sqrt(fl + this.spray * 0.5)) / Math.sqrt(1 + fRate / 400);
+    const aS = 0.42 * (0.2 + 0.8 * Math.sqrt(sc)) / Math.sqrt(1 + sRate / 300);
+    const gBed = sc * 0.08, gRum = ru * 0.35;
+    const fb = this.fb, sb = this.sb;
+    for (let i = 0; i < n; i++) {
+      if (pF > 0 && this.rnd() < pF) { const u = this.rnd(); this._hit(fb, aF * (0.2 + 1.6 * u * u * u) * (this.rnd() < 0.5 ? -1 : 1)); }
+      if (pS > 0 && this.rnd() < pS) { const u = this.rnd(); this._hit(sb, aS * (0.2 + 1.8 * u * u * u) * (this.rnd() < 0.5 ? -1 : 1)); }
+      let l = 0, r = 0;
+      for (let k = 0; k < 8; k++) {
+        let o = fb[k]; let y = o[5] + o[0] * o[3] + o[1] * o[4]; o[4] = o[3]; o[3] = y; o[5] = 0;
+        let ys = y;
+        o = sb[k]; y = o[5] + o[0] * o[3] + o[1] * o[4]; o[4] = o[3]; o[3] = y; o[5] = 0;
+        ys += y;
+        if (k < 4) l += ys; else r += ys;
+      }
+      // white noise source shared by the beds
+      const w = this.rnd() * 2 - 1;
+      // scrape bed: band-limited noise with a crackly roughness envelope
+      this.rough += ((this.rnd() * 2 - 1) - this.rough) * this.kRough;
+      this.n1 += (w - this.n1) * this.kNh; const hp = w - this.n1;
+      this.n2 += (hp - this.n2) * this.kNl;
+      const bed = this.n2 * gBed * (0.3 + 6 * Math.abs(this.rough));
+      // rumble
+      this.r1 += (w - this.r1) * this.kR; this.r2 += (this.r1 - this.r2) * this.kR;
+      const rum = this.r2 * gRum * 9;
+      // thump
+      let th = 0;
+      if (this.thEnv > 1e-4) {
+        this.thAtk = Math.min(1, this.thAtk + 1 / (0.004 * sr));
+        this.thPh += 2 * Math.PI * this.thF * (1 + 0.7 * this.thEnv) / sr;
+        if (this.thPh > 6.283185307) this.thPh -= 6.283185307;
+        this.thNz += (w - this.thNz) * 0.03;
+        th = (Math.sin(this.thPh) * this.thEnv * 0.9 + this.thNz * this.thN * 2.2) * this.thAtk * this.thAmp;
+        this.thEnv *= this.dTh; this.thN *= this.dThN;
+      }
+      let xl = l + bed + rum + th, xr = r + bed * 0.9 + rum + th;
+      L[i] = xl / Math.sqrt(1 + xl * xl);
+      R[i] = xr / Math.sqrt(1 + xr * xr);
+    }
+  }
+}
 
+class SandAudio {
+  constructor() { this.ctx = null; this.enabled = true; this.node = null; this.dsp = null; this.volume = 1.0; this._last = ''; }
+
+  // Must be called from inside a user gesture (touchend / click / keydown) at least once.
   unlock() {
-    if (this.ctx) { if (this.ctx.state === 'suspended') this.ctx.resume().catch(() => {}); return; }
+    if (this.ctx) { if (this.ctx.state !== 'running') this.resume(); return; }
     const AC = window.AudioContext || window.webkitAudioContext;
     if (!AC) return;
-    try { this.ctx = new AC(); } catch (e) { return; }
+    // iOS 17+: mix with the user's music and respect the silent switch
+    try { if (navigator.audioSession) navigator.audioSession.type = 'ambient'; } catch (e) {}
+    try { this.ctx = new AC({ latencyHint: 'interactive' }); } catch (e) { try { this.ctx = new AC(); } catch (e2) { return; } }
     const ctx = this.ctx;
-    const sr = ctx.sampleRate;
-    const mkGrit = (seconds, density, decayMin, decayMax, noise) => {
-      const len = Math.floor(sr * seconds);
-      const buf = ctx.createBuffer(2, len, sr);
-      for (let ch = 0; ch < 2; ch++) {
-        const d = buf.getChannelData(ch);
-        let seed = 1234567 + ch * 7919;
-        const rand = () => { seed = (seed * 1664525 + 1013904223) >>> 0; return seed / 4294967296; };
-        for (let i = 0; i < len; i++) d[i] = (rand() * 2 - 1) * noise;
-        const clicks = Math.floor(seconds * density);
-        for (let c = 0; c < clicks; c++) {
-          const pos = Math.floor(rand() * len);
-          const amp = Math.pow(rand(), 2.5) * (rand() < 0.5 ? -1 : 1);
-          const dec = decayMin + rand() * (decayMax - decayMin);
-          const f = 0.2 + rand() * 0.6;
-          for (let k = 0; k < dec * 6 && pos + k < len; k++) {
-            d[pos + k] += amp * Math.exp(-k / dec) * Math.sin(k * f * 3.0);
-          }
-        }
-        // seamless loop: crossfade ends
-        const fade = Math.floor(sr * 0.05);
-        for (let i = 0; i < fade; i++) { const t = i / fade; d[i] = d[i] * t + d[len - fade + i] * (1 - t); }
-      }
-      return buf;
-    };
-    this.master = ctx.createGain(); this.master.gain.value = this.enabled ? 1 : 0; this.master.connect(ctx.destination);
-    const chain = (buf, type, freq, q) => {
-      const src = ctx.createBufferSource(); src.buffer = buf; src.loop = true;
-      const f = ctx.createBiquadFilter(); f.type = type; f.frequency.value = freq; f.Q.value = q;
-      const g = ctx.createGain(); g.gain.value = 0;
-      src.connect(f); f.connect(g); g.connect(this.master);
-      src.start(0, Math.random() * buf.duration);
-      return { src, f, g };
-    };
-    this.flowN = chain(mkGrit(3.1, 9000, 2, 14, 0.05), 'bandpass', 3800, 0.6);
-    this.scrapeN = chain(mkGrit(2.7, 4000, 6, 40, 0.12), 'lowpass', 2400, 0.7);
-    this.rumbleN = chain(mkGrit(2.3, 1500, 30, 120, 0.2), 'lowpass', 500, 0.9);
+    // play one silent sample inside the gesture (older iOS needs this to unmute WebAudio)
+    try { const b = ctx.createBuffer(1, 1, ctx.sampleRate); const s = ctx.createBufferSource(); s.buffer = b; s.connect(ctx.destination); s.start(0); } catch (e) {}
+    if (ctx.state !== 'running') ctx.resume().catch(() => {});
+    this.master = ctx.createGain();
+    this.master.gain.value = 0;
+    this.master.connect(ctx.destination);
+    this._fadeTo(this.enabled ? this.volume : 0, 0.25);
+    this._build();
   }
 
-  setEnabled(on) {
-    this.enabled = on;
-    if (this.master) this.master.gain.setTargetAtTime(on ? 1 : 0, this.ctx.currentTime, 0.05);
+  async _build() {
+    const ctx = this.ctx;
+    if (ctx.audioWorklet && window.AudioWorkletNode && window.Blob && window.URL) {
+      const src = SandDSP.toString() + `
+class SandProc extends AudioWorkletProcessor {
+  constructor() { super(); this.d = new SandDSP(sampleRate); this.port.onmessage = (e) => { const m = e.data; if (m.thump) this.d.thump(m.thump); else this.d.set(m); }; }
+  process(inp, out) { const o = out[0]; if (!o || !o[0]) return true; this.d.process(o[0], o[1] || o[0], o[0].length); return true; }
+}
+registerProcessor('sand-proc', SandProc);`;
+      try {
+        const url = URL.createObjectURL(new Blob([src], { type: 'application/javascript' }));
+        await ctx.audioWorklet.addModule(url);
+        URL.revokeObjectURL(url);
+        this.node = new AudioWorkletNode(ctx, 'sand-proc', { numberOfInputs: 0, numberOfOutputs: 1, outputChannelCount: [2] });
+        this.node.connect(this.master);
+        this.post = (m) => this.node.port.postMessage(m);
+        return;
+      } catch (e) { /* fall through to ScriptProcessor */ }
+    }
+    try {
+      const dsp = new SandDSP(ctx.sampleRate);
+      const sp = ctx.createScriptProcessor(2048, 0, 2);
+      sp.onaudioprocess = (e) => { const ob = e.outputBuffer; dsp.process(ob.getChannelData(0), ob.getChannelData(1), ob.length); };
+      sp.connect(this.master);
+      this.node = sp; this.dsp = dsp;
+      this.post = (m) => { if (m.thump) dsp.thump(m.thump); else dsp.set(m); };
+    } catch (e) { /* no audio */ }
   }
 
-  // activity: surface flux (normalised 0..~1), scrape: finger plowing (0..~1), mass: big avalanche (0..1)
-  update(activity, scrape, rumble) {
+  _fadeTo(v, tau) {
+    if (!this.master) return;
+    const g = this.master.gain, t = this.ctx.currentTime;
+    try { g.cancelScheduledValues(t); g.setValueAtTime(g.value, t); } catch (e) {}
+    g.setTargetAtTime(v, t, tau);
+  }
+
+  setEnabled(on) { this.enabled = on; this._fadeTo(on ? this.volume : 0, 0.06); }
+
+  // page hidden / shown: fade out then suspend so nothing pops, and stop burning CPU
+  suspend() {
     if (!this.ctx || this.ctx.state !== 'running') return;
-    const t = this.ctx.currentTime;
-    const fa = Math.min(1, Math.pow(activity, 0.7));
-    const sc = Math.min(1, Math.pow(scrape, 0.6));
-    const ru = Math.min(1, rumble);
-    this.flowN.g.gain.setTargetAtTime(fa * 0.55, t, 0.04);
-    this.flowN.f.frequency.setTargetAtTime(2600 + fa * 2600, t, 0.08);
-    this.flowN.src.playbackRate.setTargetAtTime(0.8 + fa * 0.5, t, 0.1);
-    this.scrapeN.g.gain.setTargetAtTime(sc * 0.7, t, 0.03);
-    this.scrapeN.f.frequency.setTargetAtTime(1400 + sc * 2600, t, 0.05);
-    this.rumbleN.g.gain.setTargetAtTime(ru * 0.5, t, 0.08);
+    this._fadeTo(0, 0.02);
+    const ctx = this.ctx;
+    setTimeout(() => { if (document.hidden) ctx.suspend().catch(() => {}); }, 120);
   }
+  resume() {
+    if (!this.ctx || this.ctx.state === 'closed' || document.hidden) return;
+    const go = () => this._fadeTo(this.enabled ? this.volume : 0, 0.2);
+    if (this.ctx.state !== 'running') this.ctx.resume().then(go, () => {}); else go();
+  }
+
+  get running() { return !!(this.ctx && this.ctx.state === 'running' && this.post); }
+
+  // flow: flowing surface (0..1), scrape: finger plowing (0..1), rumble: bulk sliding (0..1), bright: 0..1 (grain size/colour)
+  update(flow, scrape, rumble, bright = 0.5) {
+    if (!this.running) return;
+    const q = (v) => Math.round(Math.min(1, Math.max(0, v)) * 1000) / 1000;
+    const m = { flow: q(flow), scrape: q(scrape), rumble: q(rumble), bright: q(bright) };
+    const key = m.flow + ',' + m.scrape + ',' + m.rumble + ',' + m.bright;
+    if (key === this._last) return;
+    this._last = key;
+    this.post(m);
+  }
+  thump(a) { if (this.running && this.enabled) this.post({ thump: a }); }
 }
 
 // ---- 60_app.js
@@ -1072,6 +1696,9 @@ class SandAudio {
 
   // ---------------- physical scale ----------------
   const isTouch = ('ontouchstart' in window) || navigator.maxTouchPoints > 0;
+  const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+  const isStandalone = navigator.standalone === true || matchMedia('(display-mode: standalone), (display-mode: fullscreen)').matches;
+  const isDesktop = !isTouch || matchMedia('(hover: hover) and (pointer: fine)').matches;
   const minScreen = Math.min(screen.width, screen.height);
   const mmPerCss = isTouch ? (minScreen >= 600 ? 25.4 / 132 : 25.4 / 160) : 25.4 / 96;
   const GRAIN_MM = 0.36;
@@ -1082,73 +1709,169 @@ class SandAudio {
     rot: 0, natW: 0, natH: 0, cellCss: 2.2, cellMm: GRAIN_MM, simW: 0, simH: 0,
     renderScale: 1, dpr: Math.min(window.devicePixelRatio || 1, 3),
     // sensors
-    motion: false, motionAsked: false, aSign: 0, signVotes: 0,
+    motion: false, aSign: 0, signVotes: 0,
     gRaw: [0, 0, -9.81], gFilt: [0, 0, -9.81], gSlow: [0, 0, -9.81], hpEnergy: 0, lastMotion: 0,
     orient: null,
     virtTilt: [0, 0], virtShake: [0, 0, 0],
-    started: false
+    started: false,
+    // layout: tray = simulated area in CSS px of the natural frame; vw/vh = viewport the layout was computed for
+    trayW: 0, trayH: 0, screenMode: false, vw: 0, vh: 0,
+    motionState: 'unknown'
   };
+  const store = {
+    get(k, d) { try { const v = localStorage.getItem('sand.' + k); return v == null ? d : JSON.parse(v); } catch (e) { return d; } },
+    set(k, v) { try { localStorage.setItem('sand.' + k, JSON.stringify(v)); } catch (e) {} }
+  };
+  if (!TEST) {
+    const p = store.get('preset', app.preset); if (PRESETS[p]) app.preset = p;
+    const t = store.get('tool', app.tool); if (['finger', 'rake', 'pour'].includes(t)) app.tool = t;
+    app.sound = store.get('sound', true) !== false;
+  }
   let engine;
   try { engine = new SandEngine(canvas); }
   catch (e) { showFatal(e.message); return; }
   const audio = new SandAudio();
+  audio.enabled = app.sound;
   window.SAND = { app, engine, audio };
 
   function showFatal(msg) {
     const f = $('fatal'); f.textContent = msg + ' Try a recent version of Safari or Chrome.'; f.style.display = 'flex';
+    ['menuBtn', 'hint'].forEach(id => { const el = $(id); if (el) el.style.display = 'none'; });
   }
 
   // ---------------- layout & orientation ----------------
+  // The tray lives in the device's NATURAL frame (= the motion-sensor frame) and never turns with the UI:
+  // when the browser rotates the page, the canvas is counter-rotated with CSS. On phones and tablets the
+  // tray is the whole physical screen, so rotation, browser bars and the iOS URL bar never resize (or wipe)
+  // the simulation: the viewport is just a window onto the tray, centred on it. The tray is only
+  // reallocated on real size changes (desktop window resize, split view), preserving the sand.
   function screenAngle() {
     let a = (screen.orientation && typeof screen.orientation.angle === 'number') ? screen.orientation.angle
       : (typeof window.orientation === 'number' ? window.orientation : 0);
-    a = ((a % 360) + 360) % 360;
+    a = ((Math.round(a / 90) * 90 % 360) + 360) % 360;
     return a;
   }
-  function layout() {
+  function readViewport() {
     const vw = window.innerWidth, vh = window.innerHeight;
     const a = isTouch ? screenAngle() : 0;
     const swap = a === 90 || a === 270;
-    const nw = swap ? vh : vw, nh = swap ? vw : vh;
-    app.rot = a;
-    canvas.style.width = nw + 'px'; canvas.style.height = nh + 'px';
-    canvas.style.left = ((vw - nw) / 2) + 'px'; canvas.style.top = ((vh - nh) / 2) + 'px';
-    canvas.style.transform = a ? `rotate(${-a}deg)` : '';
-    if (Math.abs(nw - app.natW) > 2 || Math.abs(nh - app.natH) > 2 || !app.simW) {
-      app.natW = nw; app.natH = nh;
-      setupSim();
+    return { vw, vh, a, nw: swap ? vh : vw, nh: swap ? vw : vh };
+  }
+  // physical screen size (CSS px) in the natural frame, or null when the page does not fill most of the screen
+  function screenNatural(v) {
+    if (!isTouch || !window.screen) return null;
+    let sw = screen.width, sh = screen.height;
+    if (!(sw > 0 && sh > 0)) return null;
+    // Android reports screen.width/height in the current orientation, iOS always in portrait
+    if ((sw > sh) === (v.vw > v.vh) && (v.a === 90 || v.a === 270)) { const t = sw; sw = sh; sh = t; }
+    if (v.nw > sw + 4 || v.nh > sh + 4 || v.nw < 0.6 * sw || v.nh < 0.6 * sh) return null;
+    return [sw, sh];
+  }
+  function wantedTray(v) {
+    const s = screenNatural(v);
+    return s ? { w: s[0], h: s[1], screen: true } : { w: v.nw, h: v.nh, screen: false };
+  }
+  let lastLayoutKey = '', pendingTray = null, layoutBlockedSince = 0;
+  function layoutKey() { return window.innerWidth + 'x' + window.innerHeight + '@' + (isTouch ? screenAngle() : 0) + '/' + (window.devicePixelRatio || 1); }
+  function layout() {
+    const v = readViewport();
+    if (!(v.vw > 0 && v.vh > 0)) return;
+    // Mid-rotation the angle and the viewport size change at different moments: wait until they agree.
+    // (If they never agree - odd devices - go ahead after 700 ms.)
+    if (app.simW && app.screenMode && Math.abs(v.nw - v.nh) > 40 && (v.nh > v.nw) !== (app.natH > app.natW)) {
+      if (!layoutBlockedSince) layoutBlockedSince = performance.now();
+      if (performance.now() - layoutBlockedSince < 700) return;
     }
+    layoutBlockedSince = 0;
+    lastLayoutKey = layoutKey();
+    const t = wantedTray(v);
+    if (!app.simW) { setupSim(t); pendingTray = null; }
+    else if (Math.abs(t.w - app.trayW) > 8 || Math.abs(t.h - app.trayH) > 8 || t.screen !== app.screenMode) {
+      // real size change: resize the tray once the size has settled (window drags, split-view animations)
+      const now = performance.now();
+      if (!pendingTray || Math.abs(pendingTray.w - t.w) > 2 || Math.abs(pendingTray.h - t.h) > 2) pendingTray = Object.assign({ since: now }, t);
+      else if (now - pendingTray.since > 350) { pendingTray = null; resizeTray(t); }
+    } else pendingTray = null;
+    app.vw = v.vw; app.vh = v.vh; app.rot = v.a;
+    app.dpr = Math.min(window.devicePixelRatio || 1, 3);
+    canvas.style.width = app.natW + 'px'; canvas.style.height = app.natH + 'px';
+    canvas.style.transform = `translate(${(v.vw - app.natW) / 2}px, ${(v.vh - app.natH) / 2}px)` + (v.a ? ` rotate(${-v.a}deg)` : '');
     resizeCanvas();
   }
   function resizeCanvas() {
     const s = app.dpr * app.renderScale;
-    canvas.width = Math.round(app.natW * s); canvas.height = Math.round(app.natH * s);
+    const w = Math.max(1, Math.round(app.natW * s)), h = Math.max(1, Math.round(app.natH * s));
+    // assigning width/height clears the drawing buffer, so only do it on a real change (and redraw)
+    if (canvas.width !== w || canvas.height !== h) { canvas.width = w; canvas.height = h; wake(); }
   }
   // client (viewport) coordinates -> natural-frame CSS px
   function toNatural(cx, cy) {
-    const vw = window.innerWidth, vh = window.innerHeight;
-    const dx = cx - vw / 2, dy = cy - vh / 2;
+    const dx = cx - app.vw / 2, dy = cy - app.vh / 2;
     const th = app.rot * Math.PI / 180; // undo CSS rotate(-a): rotate by +a
     const c = Math.cos(th), s = Math.sin(th);
     return [dx * c - dy * s + app.natW / 2, dx * s + dy * c + app.natH / 2];
   }
 
   // ---------------- world generation ----------------
-  function setupSim() {
+  function baseCellCss(w, h) {
     let cellCss = GRAIN_MM / mmPerCss;
-    const cells = (app.natW / cellCss) * (app.natH / cellCss);
+    const cells = (w / cellCss) * (h / cellCss);
     if (cells > MAX_CELLS) cellCss *= Math.sqrt(cells / MAX_CELLS);
-    app.cellCss = cellCss;
-    app.cellMm = cellCss * mmPerCss;
-    const W = Math.max(16, Math.round(app.natW / cellCss));
-    const H = Math.max(16, Math.round(app.natH / cellCss));
-    app.cellCss = app.natW / W; // exact fit horizontally
-    app.simW = W; app.simH = H;
+    return cellCss;
+  }
+  function applyGrid(t, W, H, cellCss) {
+    app.trayW = t.w; app.trayH = t.h; app.screenMode = t.screen;
+    app.cellCss = cellCss; app.cellMm = cellCss * mmPerCss;
+    app.simW = W; app.simH = H; app.natW = W * cellCss; app.natH = H * cellCss;
+  }
+  function setupSim(t) {
+    let cellCss = baseCellCss(t.w, t.h);
+    const W = Math.max(16, Math.round(t.w / cellCss));
+    cellCss = t.w / W; // exact fit horizontally
+    const H = Math.max(16, Math.round(t.h / cellCss));
+    applyGrid(t, W, H, cellCss);
+    app.dpr = Math.min(window.devicePixelRatio || 1, 3);
+    // start at a resolution that a phone GPU can shade at 60 Hz; adaptive quality refines it
+    app.renderScale = Math.min(1, Math.max(0.5, Math.sqrt(3.4e6 / (app.natW * app.natH * app.dpr * app.dpr))));
     const st = generateWorld(W, H, app.started ? null : 'intro');
     engine.setup(W, H, st.state, st.aux);
     // let the freshly made grooves settle into a natural angle of repose
     const P = physicsParams(1 / 60, true);
     for (let i = 0; i < (TEST ? 30 : 45); i++) engine.simulate(1 / 60, P, { segs: [] });
+  }
+  // Real size change: keep the sand where it physically is (crop / pad around the centre). The cell size is
+  // only changed when the cell budget requires it; heights are converted so the physical depth is kept.
+  function resizeTray(t) {
+    const old = engine.readState();
+    const oW = app.simW, oH = app.simH, oCell = app.cellCss;
+    const base = baseCellCss(t.w, t.h);
+    const cell = ((t.w / oCell) * (t.h / oCell) > MAX_CELLS * 1.02 || oCell > base * 1.02) ? base : oCell;
+    const W = Math.max(16, Math.round(t.w / cell)), H = Math.max(16, Math.round(t.h / cell));
+    const st = old ? remapState(old, oW, oH, W, H, cell / oCell) : generateWorld(W, H, null);
+    applyGrid(t, W, H, cell);
+    engine.setup(W, H, st.state, st.aux);
+    wake();
+  }
+  function remapState(old, oW, oH, W, H, scale) {
+    const N = W * H, state = new Float32Array(N * 4), aux = new Float32Array(N * 4);
+    let m = 0; for (let i = 0; i < oW * oH; i++) m += old[i * 4];
+    const mean = m / (oW * oH), hk = 1 / scale;
+    for (let y = 0; y < H; y++) {
+      const oy = Math.floor((y + 0.5 - H / 2) * scale + oH / 2);
+      for (let x = 0; x < W; x++) {
+        const i = (y * W + x) * 4;
+        const ox = Math.floor((x + 0.5 - W / 2) * scale + oW / 2);
+        if (ox >= 0 && oy >= 0 && ox < oW && oy < oH) {
+          const j = (oy * oW + ox) * 4;
+          state[i] = old[j] * hk; state[i + 3] = old[j + 3];
+        } else {
+          state[i] = mean * hk * (0.96 + Math.random() * 0.08);
+          state[i + 3] = Math.floor(Math.random() * 16777216) / 16777216;
+        }
+        aux[i + 1] = 0.55;
+      }
+    }
+    return { state, aux };
   }
 
   function generateWorld(W, H, mode) {
@@ -1198,47 +1921,76 @@ class SandAudio {
     return out;
   }
 
-  // Words written in the sand with a fingertip
+  // Words written in the sand with a fingertip. Grooves are carved straight into their settled shape:
+  // a bare-glass core, walls at a stable slope just under the angle of repose, and the removed sand packed into
+  // tight berms along the lips (exactly mass-conserving), so the words read crisply and nothing slumps at start.
   function carveIntro(h, W, H) {
     const cv = document.createElement('canvas'); cv.width = W; cv.height = H;
     const g = cv.getContext('2d');
     g.fillStyle = '#000'; g.fillRect(0, 0, W, H);
     const words = ['touch', 'tilt', 'shake'];
-    const fam = document.fonts && document.fonts.check && document.fonts.check('700 40px Caveat') ? 'Caveat' : 'cursive';
+    const fam = document.fonts && document.fonts.check && document.fonts.check('400 40px Caveat') ? 'Caveat' : 'cursive';
     let fs = W * 0.36;
-    g.font = `700 ${fs}px ${fam}`;
+    g.font = `400 ${fs}px ${fam}`;
     const widest = Math.max(...words.map(w => g.measureText(w).width));
-    fs *= Math.min(1, (W * 0.74) / widest);
-    fs = Math.min(fs, H * 0.2);
-    g.font = `700 ${fs}px ${fam}`;
+    fs *= Math.min(1, (W * 0.8) / widest);
+    fs = Math.min(fs, H * 0.21);
+    g.font = `400 ${fs}px ${fam}`;
     g.textAlign = 'center'; g.textBaseline = 'middle';
     g.lineCap = 'round'; g.lineJoin = 'round';
     g.strokeStyle = '#fff'; g.fillStyle = '#fff';
-    g.lineWidth = Math.max(3, 2.2 / app.cellMm * 0.6);
+    g.lineWidth = Math.max(2, 0.7 / app.cellMm);          // bare-glass core ~0.7 mm wide
     const lh = fs * 1.05;
     const y0 = H * 0.5 - lh;
     words.forEach((w, i) => {
       g.save();
       g.translate(W / 2 + (i - 1) * W * 0.03, y0 + i * lh);
       g.rotate(-0.06 + i * 0.03);
-      g.strokeText(w, 0, 0);
+      g.fillText(w, 0, 0);   // one groove per letter stroke (strokeText would carve both glyph outlines)
       g.restore();
     });
     const img = g.getImageData(0, 0, W, H).data;
-    let m = new Float32Array(W * H);
-    for (let i = 0; i < W * H; i++) m[i] = img[i * 4] / 255;
-    m = boxBlur(m, W, H, 1);
-    const removed = new Float32Array(W * H);
-    let tot = 0;
-    for (let i = 0; i < W * H; i++) {
-      const k = Math.min(1, m[i] * 1.6);
-      removed[i] = h[i] * k; h[i] -= removed[i]; tot += removed[i];
+    // chamfer distance (cells) to the stroke core
+    const INF = 1e9, d = new Float32Array(W * H);
+    for (let i = 0; i < W * H; i++) d[i] = img[i * 4] > 110 ? 0 : INF;
+    const a = 1, b = Math.SQRT2;
+    for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
+      const i = y * W + x; let v = d[i];
+      if (x > 0) v = Math.min(v, d[i - 1] + a);
+      if (y > 0) { v = Math.min(v, d[i - W] + a); if (x > 0) v = Math.min(v, d[i - W - 1] + b); if (x < W - 1) v = Math.min(v, d[i - W + 1] + b); }
+      d[i] = v;
     }
-    const spread = boxBlur(boxBlur(removed, W, H, 3), W, H, 2);
-    let tot2 = 0;
-    for (let i = 0; i < W * H; i++) { spread[i] *= (1 - Math.min(1, m[i] * 1.6)); tot2 += spread[i]; }
-    const sc = tot2 > 0 ? tot / tot2 : 0;
-    for (let i = 0; i < W * H; i++) h[i] += spread[i] * sc;
+    for (let y = H - 1; y >= 0; y--) for (let x = W - 1; x >= 0; x--) {
+      const i = y * W + x; let v = d[i];
+      if (x < W - 1) v = Math.min(v, d[i + 1] + a);
+      if (y < H - 1) { v = Math.min(v, d[i + W] + a); if (x < W - 1) v = Math.min(v, d[i + W + 1] + b); if (x > 0) v = Math.min(v, d[i + W - 1] + b); }
+      d[i] = v;
+    }
+    // Dry sand cannot hold walls steeper than repose, so a groove down to the glass would be ~2*h/0.62 wide and
+    // neighbouring letter strokes would merge into one pit. Strokes are therefore V-grooves cut CUT grains deep.
+    const SLOPE = 0.62;                                     // just under the static angle of repose
+    const CUT = Math.min(4.5, 1.6 / app.cellMm);
+    const h0 = Float32Array.from(h);
+    const wall = (dd, i) => Math.max(0, h0[i] - CUT) + Math.max(0, dd - 0.5) * SLOPE;
+    let removed = 0;
+    const lip = new Float32Array(W * H);
+    for (let i = 0; i < W * H; i++) {
+      const cap = wall(d[i], i);
+      if (h[i] > cap) { removed += h[i] - cap; h[i] = cap; }
+      lip[i] = d[i] - (0.5 + Math.min(CUT, h0[i]) / SLOPE); // distance beyond the groove lip (<=0 inside the groove)
+    }
+    // berm: triangle just outside the lip, scaled to hold exactly the removed sand (walls stay <= SLOPE)
+    const bw = Math.max(3, 1.1 / app.cellMm);
+    const added = (A) => { let t = 0; for (let i = 0; i < W * H; i++) { const e = lip[i]; if (e < -2 || e > bw) continue;
+      const tgt = Math.min(wall(d[i], i) + 4, h[i] + A * Math.max(0, 1 - Math.abs(e - bw * 0.25) / (bw * 0.75))); t += Math.max(0, tgt - h[i]); } return t; };
+    let lo = 0, hi = 1; while (added(hi) < removed && hi < 1e4) hi *= 2;
+    for (let k = 0; k < 40; k++) { const mid = 0.5 * (lo + hi); if (added(mid) < removed) lo = mid; else hi = mid; }
+    const A = 0.5 * (lo + hi);
+    let tot = 0; const add = new Float32Array(W * H);
+    for (let i = 0; i < W * H; i++) { const e = lip[i]; if (e < -2 || e > bw) continue;
+      const tgt = Math.min(wall(d[i], i) + 4, h[i] + A * Math.max(0, 1 - Math.abs(e - bw * 0.25) / (bw * 0.75))); add[i] = Math.max(0, tgt - h[i]); tot += add[i]; }
+    const sc = tot > 0 ? removed / tot : 0;
+    for (let i = 0; i < W * H; i++) h[i] += add[i] * sc;
   }
 
   // ---------------- physics parameters ----------------
@@ -1251,11 +2003,13 @@ class SandAudio {
     // device frame (x right, y up, z out of screen) -> sim frame (x right, y down, load into screen)
     const gs = [g[0] * 1000 * toCells, -g[1] * 1000 * toCells, -g[2] * 1000 * toCells];
     const fluid = settle ? 0 : Math.min(0.8, Math.max(0, (Math.sqrt(app.hpEnergy) - 1.5) / 9));
-    return {
-      g: gs, muThin: pr.muThin, muThick: pr.muThick, kinetic: 0.82, K: 0.68,
-      visc: 0.04, fluid, kick: fluid * 60, rate: 0.45 * (1 - fluid), rateV: 40, hmax: 48, lid: 4,
-      dtSub: 1 / 900, maxSubsteps: 24, cfl: 0.42
+    const P = {
+      g: gs, muThin: pr.muThin, muThick: pr.muThick, kinetic: 0.93, K: 0.66, rollLayer: 0.8, mobE: 1, bagV0: 3, bagCap: 3, seedMix: 0.4, mobile: true,
+      visc: 0.04, fluid, kick: fluid * 60, rate: 0.45, rateI0: 0.13, pgMax: 2, advect: true, extrap: 0.6, hIMin: 2, vStop: 12, hmax: 48, lid: 0.3,
+      dtSub: 1 / 900, maxSubsteps: 24, cfl: 0.8
     };
+    if (window.SAND && window.SAND.physOverride) Object.assign(P, window.SAND.physOverride);
+    return P;
   }
 
   // effective gravity in device frame (m/s^2), "down" vector incl. linear acceleration
@@ -1299,26 +2053,45 @@ class SandAudio {
     const hp = Math.hypot(g[0] - app.gSlow[0], g[1] - app.gSlow[1], g[2] - app.gSlow[2]);
     app.hpEnergy += (hp * hp - app.hpEnergy) * (1 - Math.exp(-dt / 0.25));
   }
-  async function requestMotion() {
-    if (app.motionAsked) return;
-    app.motionAsked = true;
-    try {
-      if (typeof DeviceMotionEvent !== 'undefined' && typeof DeviceMotionEvent.requestPermission === 'function') {
-        const r = await DeviceMotionEvent.requestPermission();
-        if (r !== 'granted') { toast('Motion access was declined. Tilt will not work until you allow it (reload to be asked again).'); return; }
+  // Motion permission. iOS 13+ only delivers devicemotion after DeviceMotionEvent.requestPermission(),
+  // which must be called synchronously inside a user-activation handler (touchend / click / keydown) and
+  // before anything else in that handler that could consume the activation. Android needs nothing.
+  const hasMotionAPI = typeof DeviceMotionEvent !== 'undefined';
+  const needsMotionPermission = hasMotionAPI && typeof DeviceMotionEvent.requestPermission === 'function';
+  app.motionState = !hasMotionAPI ? 'unavailable' : (needsMotionPermission ? 'prompt' : 'granted');
+  let motionPending = false;
+  function requestMotion(fromButton) {
+    if (!needsMotionPermission || app.motion || motionPending || (app.motionState === 'granted' && !fromButton)) return;
+    if (app.motionState === 'denied' && !fromButton) return;
+    let p;
+    try { p = DeviceMotionEvent.requestPermission(); } catch (e) { return; }
+    motionPending = true;
+    Promise.resolve(p).then((r) => {
+      motionPending = false;
+      if (r === 'granted') {
+        app.motionState = 'granted';
+        // same permission on iOS: resolves at once now, and starts deviceorientation (used for sign detection)
+        if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
+          try { DeviceOrientationEvent.requestPermission().catch(() => {}); } catch (e) {}
+        }
+      } else {
+        const again = app.motionState === 'denied';
+        app.motionState = 'denied';
+        if (isIOS) {
+          const where = isStandalone ? 'close the Sand app completely' : 'close Safari completely (swipe it away)';
+          toast(again ? `Motion access is still off for this page. To be asked again, ${where} and reopen it.`
+                      : `Tilt is off because motion access was declined. You can still draw. To turn tilt on later, ${where}, reopen it and tap Allow.`, 7000);
+        } else {
+          toast('Tilt is off because motion access was declined. You can allow motion sensors for this site in the browser\'s site settings.', 7000);
+        }
       }
-      if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
-        try { await DeviceOrientationEvent.requestPermission(); } catch (e) {}
-      }
-    } catch (e) { /* not in a user gesture or unsupported */ app.motionAsked = false; }
-    window.addEventListener('devicemotion', onMotion);
-    window.addEventListener('deviceorientation', onOrientation);
+      updatePanel();
+    }, () => { motionPending = false; /* NotAllowedError: no user activation; asked again on the next gesture */ });
   }
-  // Android / non-permission browsers: listen right away
-  if (typeof DeviceMotionEvent !== 'undefined' && typeof DeviceMotionEvent.requestPermission !== 'function') {
+  // Listen from the start everywhere: harmless before permission is granted, and immediate on Android.
+  if (hasMotionAPI) {
     window.addEventListener('devicemotion', onMotion);
     window.addEventListener('deviceorientation', onOrientation);
-    app.motionAsked = true;
   }
 
   // ---------------- pointers ----------------
@@ -1336,11 +2109,15 @@ class SandAudio {
   function onDown(e) {
     if (e.target !== canvas) return;
     e.preventDefault();
+    if (e.pointerType === 'mouse') onGesture(e); // mousedown is a user activation on desktop: start audio right away
+    if (e.pointerType === 'mouse' && e.button !== 0 && e.button !== 2) return;
     try { canvas.setPointerCapture(e.pointerId); } catch (err) {}
     const p = cellsFromEvent(e);
     const rightish = e.pointerType === 'mouse' && (e.button === 2 || e.shiftKey);
     pointers.set(e.pointerId, { pts: [p], last: p, r: fingerRadiusCells(e), dir: [1, 0], tilt: rightish, start: p, t0: performance.now(), moved: 0 });
+    if (rightish) usedTilt();
     hideHint();
+    wake();
   }
   function onMove(e) {
     const ptr = pointers.get(e.pointerId);
@@ -1350,8 +2127,9 @@ class SandAudio {
     for (const ev of (evs.length ? evs : [e])) {
       const p = cellsFromEvent(ev);
       if (ptr.tilt) {
-        app.virtTilt[0] = Math.max(-0.9, Math.min(0.9, app.virtTilt[0] + (p[0] - ptr.last[0]) * 0.004));
-        app.virtTilt[1] = Math.max(-0.9, Math.min(0.9, app.virtTilt[1] - (p[1] - ptr.last[1]) * 0.004));
+        // desktop virtual tilt: the sand follows the drag
+        app.virtTilt[0] = Math.max(-0.9, Math.min(0.9, app.virtTilt[0] + (p[0] - ptr.last[0]) * app.cellCss * 0.006));
+        app.virtTilt[1] = Math.max(-0.9, Math.min(0.9, app.virtTilt[1] + (p[1] - ptr.last[1]) * app.cellCss * 0.006));
         ptr.last = p; continue;
       }
       const lp = ptr.pts[ptr.pts.length - 1];
@@ -1361,33 +2139,55 @@ class SandAudio {
         ptr.dir = [(p[0] - lp[0]) / d, (p[1] - lp[1]) / d];
       }
     }
+    if (ptr.pts.length > 400) ptr.pts.splice(1, ptr.pts.length - 200); // never grows unbounded if frames stall
     if (e.pointerType === 'touch' && e.width > 4) ptr.r += (fingerRadiusCells(e) - ptr.r) * 0.2;
   }
   function onUp(e) {
-    const ptr = pointers.get(e.pointerId);
-    if (ptr) pointers.delete(e.pointerId);
-    // the first real gesture unlocks motion permission + audio
-    if (!TEST) {
-      if (!app.motionAsked || (typeof DeviceMotionEvent !== 'undefined' && typeof DeviceMotionEvent.requestPermission === 'function' && !app.motion)) requestMotion();
-      if (app.sound) audio.unlock();
-    }
+    if (pointers.has(e.pointerId)) pointers.delete(e.pointerId);
   }
   canvas.addEventListener('pointerdown', onDown, { passive: false });
   canvas.addEventListener('pointermove', onMove, { passive: false });
   canvas.addEventListener('pointerup', onUp);
   canvas.addEventListener('pointercancel', onUp);
-  canvas.addEventListener('contextmenu', e => e.preventDefault());
-  document.addEventListener('touchmove', e => e.preventDefault(), { passive: false });
-  document.addEventListener('gesturestart', e => e.preventDefault());
-  document.addEventListener('dblclick', e => e.preventDefault());
+  canvas.addEventListener('lostpointercapture', onUp);
+  window.addEventListener('blur', () => pointers.clear());
+  // no context menu, scrolling, rubber-banding, pinch or double-tap zoom, selection or callouts
+  document.addEventListener('contextmenu', e => e.preventDefault());
+  const panelEl = $('panel');
+  document.addEventListener('touchmove', e => { if (e.cancelable && !(panelEl.contains(e.target) && panelEl.scrollHeight > panelEl.clientHeight + 1)) e.preventDefault(); }, { passive: false });
+  document.addEventListener('touchstart', e => { if (e.touches.length > 1 && e.cancelable && e.target === canvas) e.preventDefault(); }, { passive: false });
+  ['gesturestart', 'gesturechange', 'gestureend'].forEach(t => document.addEventListener(t, e => e.preventDefault(), { passive: false }));
+  document.addEventListener('dblclick', e => e.preventDefault(), { passive: false });
+  document.addEventListener('selectstart', e => e.preventDefault());
+  document.addEventListener('dragstart', e => e.preventDefault());
 
-  // keyboard tilt for desktop
+  // The first real gesture (touchend / click / key) asks for motion access (iOS) and unlocks audio.
+  // Motion permission goes FIRST so nothing else can consume the user activation.
+  function onGesture(e) {
+    if (TEST) return;
+    const t = e && e.target;
+    const inUI = t && t.closest && t.closest('#panel, #menuBtn');
+    if (!inUI) requestMotion(false);
+    if (app.sound) audio.unlock();
+  }
+  document.addEventListener('touchend', onGesture, { capture: true, passive: true });
+  document.addEventListener('click', onGesture, true);
+
+  // keyboard tilt for desktop: arrows push the sand that way, space shakes
   const keys = new Set();
   window.addEventListener('keydown', e => {
+    if (e.metaKey || e.ctrlKey || e.altKey) return;
+    if (e.key === 'Escape') { setPanel(false); return; }
+    if (!e.key.startsWith('Arrow') && e.key !== ' ') return;
+    onGesture(e);
+    e.preventDefault();
     keys.add(e.key);
-    if (e.key === ' ') { app.virtShake = [(Math.random() - 0.5) * 60, (Math.random() - 0.5) * 60, -20]; }
+    usedTilt();
+    if (e.key === ' ' && !e.repeat) { app.virtShake = [(Math.random() - 0.5) * 60, (Math.random() - 0.5) * 60, -20]; }
+    wake();
   });
   window.addEventListener('keyup', e => keys.delete(e.key));
+  window.addEventListener('blur', () => keys.clear());
 
   // Build contact segments for this frame
   let rakeDirs = new Map();
@@ -1418,7 +2218,9 @@ class SandAudio {
       for (let i = 1; i < path.length; i++) len += Math.hypot(path[i][0] - path[i - 1][0], path[i][1] - path[i - 1][1]);
       plowSpeed += len / frameDt;
       if (app.tool === 'rake') {
-        const tines = 4, spacing = 2.6 / app.cellMm, tr = 0.75 / app.cellMm;
+        // Zen rake: thin tines that plow a fixed depth below the untouched surface (not down to the glass),
+        // so neighbouring grooves stay separate V-lines with ridges between them
+        const tines = 4, spacing = 2.6 / app.cellMm, tr = 0.5 / app.cellMm, cut = 1.5 / app.cellMm;
         const d = ptr.dir; const nrm = [-d[1], d[0]];
         let prevD = rakeDirs.get(id) || nrm;
         const sm = [prevD[0] * 0.85 + nrm[0] * 0.15, prevD[1] * 0.85 + nrm[1] * 0.15];
@@ -1427,7 +2229,7 @@ class SandAudio {
         const a0 = path[0], a1 = path[path.length - 1];
         for (let t = 0; t < tines; t++) {
           const o = (t - (tines - 1) / 2) * spacing;
-          segs.push([a0[0] + nn[0] * o, a0[1] + nn[1] * o, a1[0] + nn[0] * o, a1[1] + nn[1] * o, tr]);
+          segs.push([a0[0] + nn[0] * o, a0[1] + nn[1] * o, a1[0] + nn[0] * o, a1[1] + nn[1] * o, tr, cut]);
         }
       } else {
         if (path.length === 1) segs.push([path[0][0], path[0][1], path[0][0], path[0][1], ptr.r]);
@@ -1440,152 +2242,370 @@ class SandAudio {
   }
 
   // ---------------- light ----------------
-  const light = { L: [0.45, -0.55, 0.7], up: [0, 0, 1] };
+  // Lighting: a key light from the top-left of the screen (~32 deg above the sand) plus sky fill.
+  // The light is fixed in the world while the device moves: tilting rotates it relative to the screen exactly like a real
+  // lamp (shadows sweep, sparkles twinkle). The reference orientation slowly (~4 s) follows the way the phone is held, so
+  // at any steady holding angle the sand is lit from a good direction instead of from behind the screen plane.
+  const light = { L: [-0.4, -0.7, 0.53], up: [0, 0, 1], key: 1, gRef: null };
   function updateLight(dt) {
-    // world up in device frame
-    let down = app.motion ? app.gSlow : effectiveGravity();
-    const n = Math.hypot(down[0], down[1], down[2]) || 1;
-    const up = [-down[0] / n, -down[1] / n, -down[2] / n];
-    // light from above, offset toward the device's top-left
-    const elev = 40 * Math.PI / 180;
-    const d0 = [-0.5, 0.85, 0];
-    const dd = d0[0] * up[0] + d0[1] * up[1] + d0[2] * up[2];
-    let hz = [d0[0] - dd * up[0], d0[1] - dd * up[1], d0[2] - dd * up[2]];
-    const hl = Math.hypot(...hz) || 1; hz = hz.map(v => v / hl);
-    let L = [0, 1, 2].map(i => up[i] * Math.sin(elev) + hz[i] * Math.cos(elev));
-    if (L[2] < 0.12) { L[2] = 0.12; }
-    const ln = Math.hypot(...L); L = L.map(v => v / ln);
-    const Ls = [L[0], -L[1], L[2]], ups = [up[0], -up[1], up[2]];
-    const k = 1 - Math.exp(-dt / 0.15);
+    const g = app.motion ? app.gSlow : effectiveGravity();
+    const n = Math.hypot(g[0], g[1], g[2]) || 1;
+    const b = [-g[0] / n, -g[1] / n, -g[2] / n];                    // world up, device frame
+    if (!light.gRef || TEST) light.gRef = TEST ? [0, 0, 1] : b.slice();
+    else {
+      const kr = 1 - Math.exp(-dt / 4.0);
+      for (let i = 0; i < 3; i++) light.gRef[i] += (b[i] - light.gRef[i]) * kr;
+      const m = Math.hypot(...light.gRef) || 1; light.gRef = light.gRef.map(v => v / m);
+    }
+    if (light.gRef[0] * b[0] + light.gRef[1] * b[1] + light.gRef[2] * b[2] < -0.8) light.gRef = b.slice();   // flipped over
+    const a = light.gRef;
+    // default light in the device frame (x right, y up, z out of the screen)
+    const elev = ((window.SAND.vis && window.SAND.vis.elev) || 32) * Math.PI / 180;
+    const az = [-0.64, 0.77];
+    let L0 = [az[0] * Math.cos(elev), az[1] * Math.cos(elev), Math.sin(elev)];
+    // rotate by the device rotation since the reference (a -> b), Rodrigues
+    const v = [a[1] * b[2] - a[2] * b[1], a[2] * b[0] - a[0] * b[2], a[0] * b[1] - a[1] * b[0]];
+    const c = a[0] * b[0] + a[1] * b[1] + a[2] * b[2];
+    const cross = (p, q) => [p[1] * q[2] - p[2] * q[1], p[2] * q[0] - p[0] * q[2], p[0] * q[1] - p[1] * q[0]];
+    const vx = cross(v, L0), vxx = cross(v, vx), f = 1 / Math.max(1 + c, 1e-3);
+    let L = [0, 1, 2].map(i => L0[i] + vx[i] + vxx[i] * f);
+    // light grazing or behind the screen plane: the device shadows the sand; keep a usable direction, dim the key
+    const minZ = 0.26;
+    const key = 0.3 + 0.7 * Math.min(1, Math.max(0, (L[2] + 0.3) / (minZ + 0.3)));
+    if (L[2] < minZ) {
+      const hl = Math.hypot(L[0], L[1]) || 1, s2 = Math.sqrt(1 - minZ * minZ);
+      L = [L[0] / hl * s2, L[1] / hl * s2, minZ];
+    }
+    const ln = Math.hypot(...L); L = L.map(q => q / ln);
+    const Ls = [L[0], -L[1], L[2]], ups = [b[0], -b[1], b[2]];
+    const k = TEST ? 1 : 1 - Math.exp(-dt / 0.15);
     for (let i = 0; i < 3; i++) { light.L[i] += (Ls[i] - light.L[i]) * k; light.up[i] += (ups[i] - light.up[i]) * k; }
+    light.key += (key - light.key) * k;
+    const ln2 = Math.hypot(...light.L) || 1; light.L = light.L.map(q => q / ln2);
   }
 
   // ---------------- UI ----------------
+  const hintEl = $('hint');
   let hintTimer = 0;
+  function showHint() {
+    if (TEST) return;
+    if (isDesktop) hintEl.innerHTML = 'drag to draw · <kbd>shift</kbd>+drag or arrows to tilt · <kbd>space</kbd> to shake';
+    else hintEl.textContent = 'tap  ···  for sands & tools';
+    setTimeout(() => hintEl.classList.add('show'), 900);
+    hintTimer = setTimeout(() => hintEl.classList.remove('show'), isDesktop ? 16000 : 7000);
+  }
   function hideHint() {
     if (app.started) return;
     app.started = true;
-    $('hint').classList.add('gone');
+    if (!isDesktop) { clearTimeout(hintTimer); hintEl.classList.remove('show'); }
   }
+  function usedTilt() { if (isDesktop) { clearTimeout(hintTimer); hintEl.classList.remove('show'); } }
   function toast(msg, ms = 4200) {
     const t = $('toast'); t.textContent = msg; t.classList.add('show');
     clearTimeout(t._tm); t._tm = setTimeout(() => t.classList.remove('show'), ms);
+  }
+  function setPanel(open) {
+    document.body.classList.toggle('panel-open', open);
+    $('menuBtn').setAttribute('aria-expanded', open ? 'true' : 'false');
+    if (open) updatePanel();
+  }
+  function markTool() {
+    const bs = [...document.querySelectorAll('[data-tool]')];
+    const i = Math.max(0, bs.findIndex(b => b.dataset.tool === app.tool));
+    bs.forEach((b, k) => b.classList.toggle('on', k === i));
+    const pill = document.querySelector('#tools .pill');
+    pill.style.width = `calc((100% - 6px) / ${bs.length})`;
+    pill.style.transform = `translateX(${i * 100}%)`;
+  }
+  function updatePanel() {
+    const sb = $('soundBtn');
+    sb.classList.toggle('off', !app.sound);
+    sb.setAttribute('aria-pressed', app.sound ? 'true' : 'false');
+    sb.querySelector('.w').style.display = app.sound ? '' : 'none';
+    sb.querySelector('.x').style.display = app.sound ? 'none' : '';
+    sb.querySelector('b').textContent = app.sound ? 'Sound' : 'Muted';
+    const tb = $('tiltBtn');
+    const showTilt = isTouch && needsMotionPermission && !app.motion;
+    tb.style.display = showTilt ? '' : 'none';
+    tb.classList.toggle('warn', app.motionState === 'denied');
+    const fs = $('fsBtn'), el = document.documentElement;
+    const canFs = !isStandalone && !!(el.requestFullscreen || el.webkitRequestFullscreen) && !isIOS;
+    fs.style.display = canFs ? '' : 'none';
+    const inFs = !!(document.fullscreenElement || document.webkitFullscreenElement);
+    fs.lastChild.textContent = inFs ? 'Exit full screen' : 'Full screen';
+    const note = $('note');
+    if (isIOS && !isStandalone) { note.innerHTML = 'For the real thing, tap Share&nbsp;› <b>Add to Home Screen</b>. Sand then opens edge to edge, without browser bars.'; note.style.display = 'block'; }
+    else if (isDesktop) { note.innerHTML = 'Drag to draw · <b>shift</b>-drag, right-drag or arrow keys to tilt · <b>space</b> to shake'; note.style.display = 'block'; }
+    else note.style.display = 'none';
   }
   function buildUI() {
     const sw = $('sands');
     Object.entries(PRESETS).forEach(([k, p]) => {
       const b = document.createElement('button');
       b.className = 'sand' + (k === app.preset ? ' on' : '');
+      b.setAttribute('aria-label', p.name);
       b.innerHTML = `<i style="background:radial-gradient(circle at 35% 30%, ${p.swatch[0]}, ${p.swatch[1]})"></i><span>${p.name}</span>`;
-      b.onclick = () => { setPreset(k); document.querySelectorAll('.sand').forEach(x => x.classList.toggle('on', x === b)); };
+      b.onclick = () => { setPreset(k); store.set('preset', k); document.querySelectorAll('.sand').forEach(x => x.classList.toggle('on', x === b)); };
       sw.appendChild(b);
     });
     document.querySelectorAll('[data-tool]').forEach(b => {
-      b.onclick = () => { app.tool = b.dataset.tool; document.querySelectorAll('[data-tool]').forEach(x => x.classList.toggle('on', x === b)); };
+      b.onclick = () => { app.tool = b.dataset.tool; store.set('tool', app.tool); markTool(); };
     });
-    $('menuBtn').onclick = (e) => { e.stopPropagation(); $('panel').classList.toggle('open'); audio.unlock(); if (!app.motion) requestMotion(); };
-    $('closeBtn').onclick = () => $('panel').classList.remove('open');
-    $('soundBtn').onclick = () => { app.sound = !app.sound; audio.setEnabled(app.sound); if (app.sound) audio.unlock(); $('soundBtn').classList.toggle('on', app.sound); };
-    $('smoothBtn').onclick = () => { smoothUntil = performance.now() + 1400; $('panel').classList.remove('open'); };
-    $('refillBtn').onclick = () => { refill(); $('panel').classList.remove('open'); };
-    const fs = $('fsBtn');
+    markTool();
+    $('menuBtn').onclick = (e) => { e.stopPropagation(); setPanel(!document.body.classList.contains('panel-open')); };
+    // tapping the sand while the sheet is open just closes it (the touch never reaches the sand)
+    const scrim = $('scrim');
+    scrim.addEventListener('pointerdown', (e) => { e.preventDefault(); setPanel(false); });
+    $('panel').addEventListener('pointerdown', (e) => e.stopPropagation());
+    $('soundBtn').onclick = () => {
+      app.sound = !app.sound; store.set('sound', app.sound);
+      if (app.sound) audio.unlock();
+      audio.setEnabled(app.sound);
+      updatePanel();
+    };
+    $('tiltBtn').onclick = () => {
+      if (app.motion) return;
+      requestMotion(true);
+      if (app.motionState === 'granted') setTimeout(() => { if (!app.motion) toast('No motion data from this device yet. Tilt needs a phone or tablet with motion sensors.'); }, 1500);
+    };
+    $('smoothBtn').onclick = () => { smoothUntil = performance.now() + 1400; wake(); setPanel(false); };
+    $('refillBtn').onclick = () => { refill(); setPanel(false); };
     const el = document.documentElement;
-    if (!(el.requestFullscreen || el.webkitRequestFullscreen)) fs.style.display = 'none';
-    fs.onclick = () => {
+    $('fsBtn').onclick = () => {
       const req = el.requestFullscreen || el.webkitRequestFullscreen;
       if (document.fullscreenElement || document.webkitFullscreenElement) (document.exitFullscreen || document.webkitExitFullscreen).call(document);
-      else if (req) Promise.resolve(req.call(el)).then(() => { try { screen.orientation.lock('portrait').catch(() => {}); } catch (e) {} }).catch(() => {});
+      else if (req) {
+        try {
+          Promise.resolve(req.call(el, { navigationUI: 'hide' })).then(() => {
+            // keep the UI from rotating: the sand never rotates anyway
+            try { screen.orientation.lock('natural').catch(() => {}); } catch (e) {}
+          }).catch(() => {});
+        } catch (e) {}
+      }
+      setPanel(false);
     };
-    const standalone = window.navigator.standalone || matchMedia('(display-mode: standalone)').matches;
-    const ios = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
-    if (ios && !standalone) $('a2hs').style.display = 'block';
+    ['fullscreenchange', 'webkitfullscreenchange'].forEach(t => document.addEventListener(t, updatePanel));
+    updatePanel();
   }
-  function setPreset(k) { app.preset = k; ui = presetUniforms(PRESETS[k]); }
+  function setPreset(k) { app.preset = k; ui = presetUniforms(PRESETS[k]); wake(); }
   function refill() {
     const st = generateWorld(app.simW, app.simH, null);
     engine.setup(app.simW, app.simH, st.state, st.aux);
     const P = physicsParams(1 / 60, true);
     for (let i = 0; i < 20; i++) engine.simulate(1 / 60, P, { segs: [] });
+    wake();
   }
   let smoothUntil = 0;
   let ui = presetUniforms(PRESETS[app.preset]);
 
   // ---------------- main loop ----------------
-  let last = performance.now(), slowFrames = 0, fastFrames = 0, prevActivity = 0, lastBuzz = 0;
+  let last = performance.now(), running = false, rafId = 0;
   const fpsEl = $('fps');
   let fpsAcc = 0, fpsN = 0;
+  // Idle: once the sand is at rest and nothing touches or moves the phone, stop simulating and only redraw
+  // when the light (phone attitude) changes. Saves battery and keeps the phone cool.
+  let asleep = false, quietFrames = 0, sleepG = [0, 0, -9.81], needDraw = true;
+  const lastL = [0, 0, 0];
+  function wake() { asleep = false; quietFrames = 0; needDraw = true; }
   function frame(now) {
-    if (!TEST) requestAnimationFrame(frame);
+    if (!running) return;
+    rafId = requestAnimationFrame(frame);
     let dt = (now - last) / 1000; last = now;
     if (!(dt > 0)) dt = 1 / 60;
     const rawDt = dt;
-    dt = Math.min(dt, 1 / 30);
-    step(dt);
-    // adaptive resolution
-    if (!TEST) {
-      if (rawDt > 1 / 45) { slowFrames++; fastFrames = 0; } else { fastFrames++; slowFrames = Math.max(0, slowFrames - 1); }
-      if (slowFrames > 40 && app.renderScale > 0.5) { app.renderScale = Math.max(0.5, app.renderScale - 0.1); resizeCanvas(); slowFrames = 0; }
-      if (fastFrames > 600 && app.renderScale < 1) { app.renderScale = Math.min(1, app.renderScale + 0.1); resizeCanvas(); fastFrames = 0; }
+    dt = Math.min(dt, 1 / 30); // after a stall, never take one huge physics step
+    if (layoutKey() !== lastLayoutKey || pendingTray) layout();
+    if (engine.lost) { if (lostAt && performance.now() - lostAt > 5000) location.reload(); return; }
+    if (!app.simW) return;
+    if (asleep) {
+      const g = effectiveGravity();
+      if (pointers.size || keys.size || performance.now() < smoothUntil || app.hpEnergy > 0.6 ||
+          Math.hypot(g[0] - sleepG[0], g[1] - sleepG[1], g[2] - sleepG[2]) > 0.35) wake();
     }
+    const sim = !asleep;
+    const drew = step(dt, sim, sim || needDraw);
+    if (sim) restCheck();
+    adaptQuality(rawDt, sim && drew);
     if (DEBUG) {
       fpsAcc += rawDt; fpsN++;
       if (fpsN >= 20) {
-        fpsEl.textContent = `${(fpsN / fpsAcc).toFixed(0)} fps · ${app.simW}×${app.simH} · rs ${app.renderScale.toFixed(1)} · m ${engine.stats.mass.toFixed(0)} · g ${app.gFilt.map(v => v.toFixed(1)).join(',')} · sign ${app.aSign}`;
+        fpsEl.textContent = `${(fpsN / fpsAcc).toFixed(0)} fps · ${app.simW}×${app.simH} · rs ${app.renderScale.toFixed(2)} · ${asleep ? 'idle' : 'run'} · m ${engine.stats.mass.toFixed(0)}\nact ${(engine.stats.activity / (app.simW * app.simH)).toFixed(3)} mov ${engine.stats.moving} · g ${app.gFilt.map(v => v.toFixed(1)).join(',')} · sign ${app.aSign} · ${app.motionState}`;
         fpsAcc = 0; fpsN = 0;
       }
     }
   }
+  function restCheck() {
+    const st = engine.stats, area = app.simW * app.simH;
+    const quiet = !TEST && pointers.size === 0 && keys.size === 0 && performance.now() >= smoothUntil && app.hpEnergy < 0.6 &&
+      Math.hypot(...app.virtShake) < 0.3 && st.valid && st.moving <= 2 && st.activity < area * 0.01;
+    quietFrames = quiet ? quietFrames + 1 : 0;
+    if (quietFrames > 45) { asleep = true; sleepG = effectiveGravity().slice(); }
+  }
 
-  function step(dt) {
-    // keyboard virtual tilt
-    if (!app.motion) {
-      const k = 1.2 * dt;
-      if (keys.has('ArrowLeft')) app.virtTilt[0] -= k;
-      if (keys.has('ArrowRight')) app.virtTilt[0] += k;
-      if (keys.has('ArrowUp')) app.virtTilt[1] += k;
-      if (keys.has('ArrowDown')) app.virtTilt[1] -= k;
-      app.virtTilt = app.virtTilt.map(v => Math.max(-1.2, Math.min(1.2, v)));
-      app.virtShake = app.virtShake.map(v => v * Math.exp(-dt / 0.08));
-      const vs = Math.hypot(...app.virtShake);
-      app.hpEnergy += (vs * vs - app.hpEnergy) * (1 - Math.exp(-dt / 0.25));
+  // Adaptive render resolution. Measures fps over 1 s windows; lowers the scale when < 48 fps, but undoes
+  // the change if it did not help (iOS Low Power Mode caps rAF at 30 Hz; CPU-bound frames); raises it again
+  // after sustained headroom, and remembers a ceiling when raising caused a drop (no oscillation).
+  // 120 Hz displays simply measure > 57 fps and are left alone.
+  const q = { n: 0, acc: 0, probe: null, ceiling: 1, lock: 0, cool: 3, good: 0, fails: 0 };
+  function setScale(s) { app.renderScale = Math.min(1, Math.max(0.5, s)); resizeCanvas(); }
+  function adaptQuality(rawDt, rendered) {
+    if (TEST) return;
+    if (!rendered || rawDt > 0.25) { q.n = 0; q.acc = 0; return; } // idle or stalled: window is meaningless
+    q.n++; q.acc += rawDt;
+    if (q.acc < 1) return;
+    const fps = q.n / q.acc; q.n = 0; q.acc = 0;
+    q.lock--; q.cool--;
+    if (q.probe) {
+      if (--q.probe.wait > 0) return;
+      const p = q.probe; q.probe = null;
+      if (p.dir < 0 && fps < p.fps * 1.1) { setScale(p.scale); q.fails++; q.lock = 20 << Math.min(q.fails, 4); }
+      else if (p.dir > 0 && fps < 52) { setScale(p.scale); q.ceiling = p.scale; q.cool = 120; }
+      else if (p.dir > 0) q.cool = 4;
+      return;
     }
-    const P = physicsParams(dt, false);
-    if (performance.now() < smoothUntil) { P.fluid = 0.85; P.kick = 90; }
-    const contacts = buildContacts(dt);
-    engine.simulate(dt, P, contacts);
+    q.good = fps > 57 ? q.good + 1 : 0;
+    if (fps < 48 && app.renderScale > 0.501 && q.lock <= 0) {
+      q.probe = { dir: -1, scale: app.renderScale, fps, wait: 2 };
+      setScale(app.renderScale * 0.85);
+    } else if (q.good >= 6 && app.renderScale < q.ceiling - 0.01 && q.cool <= 0) {
+      q.probe = { dir: 1, scale: app.renderScale, fps, wait: 3 };
+      setScale(Math.min(q.ceiling, app.renderScale / 0.85));
+      q.good = 0;
+    }
+  }
+
+  function inputTick(dt) {
+    if (app.motion) return;
+    // keyboard virtual tilt: the arrow pushes the sand that way
+    const k = 1.2 * dt;
+    if (keys.has('ArrowLeft')) app.virtTilt[0] -= k;
+    if (keys.has('ArrowRight')) app.virtTilt[0] += k;
+    if (keys.has('ArrowUp')) app.virtTilt[1] -= k;
+    if (keys.has('ArrowDown')) app.virtTilt[1] += k;
+    app.virtTilt = app.virtTilt.map(v => Math.max(-1.2, Math.min(1.2, v)));
+    // let go and the tray settles back level (not in test mode: scenarios set a fixed tilt)
+    let holding = keys.size > 0;
+    for (const p of pointers.values()) if (p.tilt) holding = true;
+    if (!TEST && !holding) app.virtTilt = app.virtTilt.map(v => Math.abs(v) < 2e-3 ? 0 : v * Math.exp(-dt / 0.9));
+    app.virtShake = app.virtShake.map(v => v * Math.exp(-dt / 0.08));
+    const vs = Math.hypot(...app.virtShake);
+    app.hpEnergy += (vs * vs - app.hpEnergy) * (1 - Math.exp(-dt / 0.25));
+  }
+
+  // returns true if a frame was drawn
+  function step(dt, sim = true, force = true) {
+    inputTick(dt);
+    let contacts = { segs: [], pour: null, plowSpeed: 0 };
+    if (sim) {
+      const P = physicsParams(dt, false);
+      if (performance.now() < smoothUntil) { P.fluid = 0.85; P.kick = 90; }
+      contacts = buildContacts(dt);
+      engine.simulate(dt, P, contacts);
+    }
     updateLight(dt);
+    // idle: redraw only when the light moved noticeably (sparkles follow the phone's attitude)
+    const dL = Math.hypot(light.L[0] - lastL[0], light.L[1] - lastL[1], light.L[2] - lastL[2]);
+    if (!force && dL < 0.003) { sound(dt, contacts, sim); return false; }
+    lastL[0] = light.L[0]; lastL[1] = light.L[1]; lastL[2] = light.L[2]; needDraw = false;
     const pr = PRESETS[app.preset];
     engine.render({
       L: light.L, up: light.up, cellPx: canvas.width / app.simW,
-      lightCol: [2.9, 2.78, 2.6], skyCol: [0.42, 0.47, 0.56], exposure: 1.0,
-      grainR: pr.grain, eye: 300 / app.cellMm,
+      lightCol: [2.55 * light.key, 2.4 * light.key, 2.15 * light.key], skyCol: [0.42, 0.43, 0.46], exposure: pr.exposure || 1.0,
+      grainR: pr.grain, eye: 300 / app.cellMm, albVar: pr.albVar, relief: pr.relief, rough: pr.rough, vis: window.SAND.vis ? Object.assign({}, pr.vis, window.SAND.vis) : (pr.vis || {}),
       minCol: ui.minCol, minProp: ui.minProp, meanCol: ui.meanCol
     });
-    // audio + haptics
+    sound(dt, contacts, sim);
+    return true;
+  }
+
+  // ---------------- audio + haptics ----------------
+  const snd = { fast: 0, slow: 0, lastHit: 0 };
+  function sound(dt, contacts, simulated) {
     const st = engine.stats;
     const area = app.simW * app.simH;
-    const act = st.activity / (area * 6);
-    const scrape = Math.min(1, (st.plow / 400) * 0.7 + Math.min(1, contacts.plowSpeed / 900) * (st.plow > 5 ? 0.5 : 0.05));
-    const rumble = Math.min(1, st.moving / (area * 0.08));
-    audio.update(act, scrape, rumble);
-    if (navigator.vibrate && app.motion && prevActivity > 0.25 && act < prevActivity * 0.5 && performance.now() - lastBuzz > 250) {
-      try { navigator.vibrate(Math.min(35, 8 + prevActivity * 30)); } catch (e) {}
-      lastBuzz = performance.now();
+    let act = 0, scrape = 0, rumble = 0;
+    if (simulated && st.valid) {
+      // activity = sum of min(h,3)*speed: ~1/cell for a trickle, ~30 moderate, ~200 a whole tray sliding, ~700 shaken
+      act = Math.min(1, Math.log(1 + st.activity / area / 2) / Math.log(301));
+      // plow = mass displaced by fingers this frame (~400-1500 while dragging briskly)
+      scrape = Math.min(1, Math.sqrt(st.plow / 1500)) * (0.5 + 0.5 * Math.min(1, contacts.plowSpeed / 400));
+      rumble = Math.min(1, st.moving / area * 1.2) * 0.7;
     }
-    prevActivity = prevActivity * 0.8 + act * 0.2;
+    const pr = PRESETS[app.preset];
+    const bright = Math.min(1, Math.max(0, 0.5 + (1 - (pr.grain || 1)) * 2));
+    audio.update(act, scrape, rumble, bright);
+    // impacts: flowing sand that suddenly stops (hits the wall / a pile) -> thump + a subtle buzz on Android
+    snd.fast += (act - snd.fast) * (1 - Math.exp(-dt / 0.03));
+    snd.slow += (act - snd.slow) * (1 - Math.exp(-dt / 0.2));
+    const now = performance.now();
+    if (simulated && snd.slow > 0.3 && snd.slow - snd.fast > 0.25 * snd.slow && now - snd.lastHit > 200) {
+      const a = Math.min(1, (snd.slow - snd.fast) * 3);
+      audio.thump(a);
+      buzz(a);
+      snd.lastHit = now;
+    }
   }
+  // Android only: iOS Safari has no vibration API (and we don't fake it)
+  function buzz(a) {
+    if (!navigator.vibrate || !app.motion || a < 0.15) return;
+    if (navigator.userActivation && !navigator.userActivation.hasBeenActive) return;
+    try { navigator.vibrate(Math.round(6 + 14 * a)); } catch (e) {}
+  }
+
+  // ---------------- lifecycle ----------------
+  function startLoop() {
+    if (running || TEST || document.hidden) return;
+    running = true; last = performance.now(); wake();
+    rafId = requestAnimationFrame(frame);
+  }
+  function stopLoop() { running = false; cancelAnimationFrame(rafId); }
+  // WebGL context loss (iOS does this to background tabs under memory pressure): keep a snapshot of the
+  // sand taken when the page was hidden, rebuild all GPU objects on restore and put the sand back.
+  let snapshot = null, lostAt = 0;
+  function takeSnapshot() {
+    if (engine.lost || !app.simW) return;
+    const d = engine.readState();
+    if (d) snapshot = { W: app.simW, H: app.simH, d };
+  }
+  canvas.addEventListener('webglcontextlost', (e) => { e.preventDefault(); lostAt = performance.now(); pointers.clear(); }, false);
+  canvas.addEventListener('webglcontextrestored', () => {
+    try {
+      engine.restoreContext();
+      let st;
+      if (snapshot && snapshot.W === app.simW && snapshot.H === app.simH) {
+        const aux = new Float32Array(snapshot.d.length);
+        for (let i = 1; i < aux.length; i += 4) aux[i] = 0.55;
+        st = { state: snapshot.d, aux };
+      } else st = generateWorld(app.simW, app.simH, null);
+      engine.setup(app.simW, app.simH, st.state, st.aux);
+      lostAt = 0; wake();
+    } catch (err) { location.reload(); }
+  }, false);
+  function onHidden() { stopLoop(); pointers.clear(); keys.clear(); audio.suspend(); takeSnapshot(); }
+  function onVisible() { if (!booted) return; if (engine.lost) lostAt = performance.now(); audio.resume(); startLoop(); }
+  document.addEventListener('visibilitychange', () => { if (document.hidden) onHidden(); else onVisible(); });
+  window.addEventListener('pagehide', onHidden);
+  window.addEventListener('pageshow', () => { if (!document.hidden) onVisible(); });
 
   // ---------------- boot ----------------
   buildUI();
+  let booted = false;
   const boot = () => {
+    if (booted) return;
+    booted = true;
     layout();
-    window.addEventListener('resize', () => setTimeout(layout, 60));
-    window.addEventListener('orientationchange', () => setTimeout(layout, 200));
-    if (screen.orientation) screen.orientation.addEventListener('change', () => setTimeout(layout, 60));
-    $('hint').classList.add('show');
-    if (!TEST) requestAnimationFrame((t) => { last = t; frame(t); });
+    const relayout = () => layout();
+    window.addEventListener('resize', relayout);
+    window.addEventListener('orientationchange', relayout);
+    if (screen.orientation && screen.orientation.addEventListener) screen.orientation.addEventListener('change', relayout);
+    if (window.visualViewport) window.visualViewport.addEventListener('resize', relayout);
+    showHint();
+    setTimeout(() => $('menuBtn').classList.add('idle'), 6000);
+    startLoop();
+    if (!TEST && location.protocol === 'https:' && 'serviceWorker' in navigator) {
+      window.addEventListener('load', () => navigator.serviceWorker.register('sw.js').catch(() => {}));
+    }
   };
-  canvas.addEventListener('webglcontextlost', (e) => { e.preventDefault(); toast('Graphics were reset by the system. Reloading…'); setTimeout(() => location.reload(), 800); });
   if (document.fonts && document.fonts.load) {
     Promise.race([document.fonts.load('700 40px Caveat'), new Promise(r => setTimeout(r, 1500))]).then(boot, boot);
   } else boot();
@@ -1595,13 +2615,14 @@ class SandAudio {
     step: (n = 1, dt = 1 / 60) => { for (let i = 0; i < n; i++) step(dt); },
     setTilt: (x, y) => { app.virtTilt = [x, y]; },
     shake: (v) => { app.virtShake = v; },
-    setPreset, refill, layout,
+    setPreset, refill, layout, toNatural, remapState, setPanel, toast,
     pointerDown: (id, x, y, r) => pointers.set(id, { pts: [[x, y]], last: [x, y], r: r || fingerRadiusCells({}), dir: [1, 0], tilt: false, moved: 0 }),
     pointerMove: (id, x, y) => { const p = pointers.get(id); if (!p) return; const lp = p.pts[p.pts.length - 1]; const d = Math.hypot(x - lp[0], y - lp[1]); if (d > 0.01) { p.dir = [(x - lp[0]) / d, (y - lp[1]) / d]; } p.pts.push([x, y]); },
     pointerUp: (id) => pointers.delete(id),
     setTool: (t) => { app.tool = t; },
-    hideHint
+    hideHint, _pointers: pointers
   });
+  Object.defineProperty(window.SAND, 'asleep', { get: () => asleep });
 })();
 
 </script>
